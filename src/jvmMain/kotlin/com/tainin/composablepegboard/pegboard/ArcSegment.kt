@@ -17,7 +17,6 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import com.tainin.composablepegboard.model.Game
-import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.model.Player
 import com.tainin.composablepegboard.pegboard.options.ArcSegmentOptions
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
@@ -31,7 +30,6 @@ fun ArcSegment(
     boardOffset: Offset,
     arcSegmentOptions: ArcSegmentOptions,
     streetOptions: StreetOptions,
-    lineOrder: LineOrder,
     useHighlight: Boolean,
 ) {
 
@@ -63,7 +61,7 @@ fun ArcSegment(
         }
 
         radii
-            .zip(game[lineOrder].asSequence())
+            .zip(game[arcSegmentOptions.direction.lineOrder].asSequence())
             .forEach { line ->
                 ArcLine(
                     segmentIndex = segmentIndex,

@@ -54,12 +54,11 @@ fun TestBoard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(.5f),
-                segmentIndex = 2,
+                segmentIndex = 0,
                 game = game,
                 boardOffset = boardOffset,
-                arcSegmentOptions = ArcSegmentOptions(ArcFocus.BottomRight, ArcDirection.Clockwise),
+                arcSegmentOptions = ArcSegmentOptions(ArcFocus.BottomRight, ArcDirection.AntiClockwise),
                 streetOptions = streetOptions,
-                lineOrder = LineOrder.Forward,
                 useHighlight = true,
             )
 
@@ -70,9 +69,8 @@ fun TestBoard(
                 segmentIndex = 1,
                 game = game,
                 boardOffset = boardOffset,
-                arcSegmentOptions = ArcSegmentOptions(ArcFocus.TopRight, ArcDirection.Clockwise),
+                arcSegmentOptions = ArcSegmentOptions(ArcFocus.TopRight, ArcDirection.AntiClockwise),
                 streetOptions = streetOptions,
-                lineOrder = LineOrder.Forward,
                 useHighlight = true,
             )
         }
@@ -81,12 +79,11 @@ fun TestBoard(
                 .fillMaxHeight(.5f)
                 .fillMaxWidth(.5f)
                 .align(AbsoluteAlignment.BottomRight),
-            segmentIndex = 0,
+            segmentIndex = 2,
             game = game,
             boardOffset = boardOffset,
-            arcSegmentOptions = ArcSegmentOptions(ArcFocus.Left, ArcDirection.Clockwise),
+            arcSegmentOptions = ArcSegmentOptions(ArcFocus.Left, ArcDirection.AntiClockwise),
             streetOptions = streetOptions,
-            lineOrder = LineOrder.Forward,
             useHighlight = true,
         )
 
