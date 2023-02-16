@@ -91,7 +91,7 @@ fun TestBoard(
         )
 
         val animationSpec = tween<Offset>(
-            durationMillis = 1000,
+            durationMillis = 500,
             delayMillis = 0,
             easing = EaseInQuint,
         )

@@ -21,7 +21,6 @@ import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.model.Player
 import com.tainin.composablepegboard.pegboard.options.ArcSegmentOptions
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
-import com.tainin.composablepegboard.utils.toSegmentOffset
 import com.tainin.composablepegboard.utils.unitFromAngle
 
 @Composable
@@ -85,16 +84,11 @@ private fun ArcLine(
     lineThickness: Float,
     useHighlight: Boolean,
 ) {
-    LaunchedEffect(dimensions) {
-        snapshotFlow { player.score.pair }.collect { pair ->
-            pair.a.toSegmentOffset(segmentIndex)?.let { i ->
-                player.pegPositions.a = dimensions.segmentOffset(i) + dimensions.sweep.offset
-            }
-            pair.b.toSegmentOffset(segmentIndex)?.let { i ->
-                player.pegPositions.b = dimensions.segmentOffset(i) + dimensions.sweep.offset
-            }
-        }
-    }
+    ScoreToPositionUpdater(
+        keys = arrayOf(dimensions),
+        player = player,
+        segmentIndex = segmentIndex
+    ) { i -> dimensions.segmentOffset(i) + dimensions.sweep.offset }
 
     Box(
         modifier = Modifier
