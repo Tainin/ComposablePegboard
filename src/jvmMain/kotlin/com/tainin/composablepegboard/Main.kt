@@ -14,16 +14,15 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.pegboard.ArcSegment
-import com.tainin.composablepegboard.pegboard.options.ArcDirection
-import com.tainin.composablepegboard.pegboard.options.ArcFocus
-import com.tainin.composablepegboard.pegboard.options.ArcSegmentOptions
-import com.tainin.composablepegboard.pegboard.options.StreetOptions
+import com.tainin.composablepegboard.pegboard.LinearSegment
+import com.tainin.composablepegboard.pegboard.options.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -44,6 +43,17 @@ fun TestBoard(
                 game[LineOrder.Forward].random().score.plusAssign(listOf(1, 2, 3).random())
             }
     ) {
+        LinearSegment(
+            modifier = Modifier
+                .requiredSize(streetOptions.streetWidth.let { DpSize(it * 3, it) })
+                .align(AbsoluteAlignment.BottomRight),
+            segmentIndex = 3,
+            game = game,
+            boardOffset = boardOffset,
+            segmentDirection = LinearSegmentDirection.LeftToRight,
+            streetOptions = streetOptions,
+            useHighlight = true,
+        )
         Column(
             modifier = Modifier
                 .fillMaxHeight()
