@@ -10,6 +10,8 @@ data class PlayerColor(val r: Int, val g: Int, val b: Int) {
         val Red = PlayerColor(255, 100, 100)
         val Green = PlayerColor(0, 255, 180)
         val Blue = PlayerColor(0, 180, 255)
+        val Purple = PlayerColor(180, 100, 255)
+        val Yellow = PlayerColor(255, 180, 100)
     }
 
     val highlightColor = Color(r and MASK, g and MASK, b and MASK, HIGHLIGHT_ALPHA)

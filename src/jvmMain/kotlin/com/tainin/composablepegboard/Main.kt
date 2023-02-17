@@ -1,9 +1,9 @@
 package com.tainin.composablepegboard
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.core.EaseInQuint
+import androidx.compose.animation.core.animateOffsetAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.onClick
 import androidx.compose.runtime.*
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Modifier
@@ -12,6 +12,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.takeOrElse
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.nativeKeyCode
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.DpSize
@@ -24,13 +28,12 @@ import com.tainin.composablepegboard.pegboard.ArcSegment
 import com.tainin.composablepegboard.pegboard.LinearSegment
 import com.tainin.composablepegboard.pegboard.options.*
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TestBoard(
-
+    game: Game,
 ) {
-    val game = remember { Game.makeThreePlayerGame() }
     val streetOptions = remember { StreetOptions(78.dp, 18.dp) }
+    //val streetOptions = remember { StreetOptions(64.dp, 16.dp) }
     var boardOffset by remember { mutableStateOf(Offset.Zero) }
 
     Box(
@@ -38,9 +41,6 @@ fun TestBoard(
             .fillMaxSize()
             .onPlaced {
                 boardOffset = it.positionInRoot()
-            }
-            .onClick {
-                game[LineOrder.Forward].random().score.plusAssign(listOf(1, 2, 3).random())
             }
     ) {
         LinearSegment(
@@ -131,7 +131,25 @@ fun TestBoard(
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
-        TestBoard()
+    val game = remember {
+        //Game.makeTwoPlayerGame()
+        Game.makeThreePlayerGame()
+        //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple, PlayerColor.Yellow)
+    }
+
+    Window(
+        onCloseRequest = ::exitApplication,
+        onKeyEvent = { keyEvent ->
+            if (keyEvent.type != KeyEventType.KeyDown) return@Window false
+            val digit = keyEvent.key.nativeKeyCode.run {
+                takeIf { it in (48L..57L) }?.minus(48) ?: return@Window false
+            }
+
+            game[LineOrder.Forward][digit].score += listOf(1, 2, 3).random()
+
+            true
+        }
+    ) {
+        TestBoard(game = game)
     }
 }
