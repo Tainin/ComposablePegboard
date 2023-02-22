@@ -17,9 +17,10 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import com.tainin.composablepegboard.model.Game
-import com.tainin.composablepegboard.model.Player
 import com.tainin.composablepegboard.pegboard.options.ArcSegmentOptions
+import com.tainin.composablepegboard.pegboard.options.SegmentLineOptions
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
+import com.tainin.composablepegboard.utils.transform
 import com.tainin.composablepegboard.utils.unitFromAngle
 
 @Composable
@@ -36,15 +37,20 @@ fun ArcSegment(
     var segmentOffset by remember { mutableStateOf(Offset.Zero) }
     var segmentSize by remember { mutableStateOf(Size.Zero) }
 
-    val maxRadius = arcSegmentOptions.focus.getRadius(segmentSize)
-    val (start, sweep) = arcSegmentOptions.getAngles()
-    val dimensions = SweepDimensions(
-        center = arcSegmentOptions.focus.getCenterOffset(segmentSize),
-        startAngle = start + sweep / 10,
-        stepAngle = sweep / 5,
-        offset = segmentOffset,
-    )
-    val insets = streetOptions.getLineInsets(game.playerCount)
+    val (thickness, lineSpacing) = with(LocalDensity.current) {
+        streetOptions.run { lineThickness.toPx() to lineSpacing(game.playerCount).transform { it.toPx() } }
+    }
+
+    val dimensions = arcSegmentOptions.run {
+        ArcDimensions(
+            segmentOffset = segmentOffset,
+            center = focus.getCenterOffset(segmentSize),
+            lineSpacing = lineSpacing,
+            arcAngles = getAngles(),
+            outerRadius = focus.getRadius(segmentSize),
+            thickness = thickness,
+        )
+    }
 
     Box(
         modifier = modifier
@@ -54,20 +60,17 @@ fun ArcSegment(
                 segmentSize = it.size.toSize()
             }
     ) {
-        val density = LocalDensity.current
-
-        val (radii, lineThickness) = with(density) {
-            insets.map { maxRadius - it.toPx() } to streetOptions.lineThickness.toPx()
-        }
-
-        radii
-            .zip(game[arcSegmentOptions.direction.lineOrder].asSequence())
-            .forEach { line ->
-                ArcLine(
-                    player = line.second,
+        game[arcSegmentOptions.direction.lineOrder]
+            .forEachIndexed { lineIndex, player ->
+                val lineOptions = SegmentLineOptions(
                     segmentIndex = segmentIndex,
-                    dimensions = ArcDimensions(dimensions, line.first),
-                    lineThickness = lineThickness,
+                    lineIndex = lineIndex,
+                    player = player,
+                )
+
+                ArcSegmentLine(
+                    lineOptions = lineOptions,
+                    dimensions = dimensions,
                     useHighlight = useHighlight,
                 )
             }
@@ -75,40 +78,39 @@ fun ArcSegment(
 }
 
 @Composable
-private fun ArcLine(
-    player: Player,
-    segmentIndex: Int,
+private fun ArcSegmentLine(
+    lineOptions: SegmentLineOptions,
     dimensions: ArcDimensions,
-    lineThickness: Float,
     useHighlight: Boolean,
 ) {
     ScoreToPositionUpdater(
         keys = arrayOf(dimensions),
-        player = player,
-        segmentIndex = segmentIndex,
-    ) { i -> dimensions.boardOffset(i) }
+        lineOptions = lineOptions,
+    ) { lineIndex, segmentOffset -> dimensions.globalHoleOffset(lineIndex, segmentOffset) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .drawWithCache {
-                val holePositions = List(5) { i -> dimensions.arcOffset(i) }
-                val holeRadius = lineThickness / 2
-                val stroke = Stroke(lineThickness)
+                val holePositions = List(5) { holeIndex ->
+                    dimensions.localHoleOffset(lineOptions.lineIndex, holeIndex)
+                }
+                val radius = dimensions.lineRadius(lineOptions.lineIndex)
+                val stroke = Stroke(dimensions.thickness)
 
                 onDrawBehind {
                     if (useHighlight)
                         drawCircle(
-                            color = player.color.highlightColor,
-                            radius = dimensions.radius,
-                            center = dimensions.sweep.center,
+                            color = lineOptions.player.color.highlightColor,
+                            radius = radius,
+                            center = dimensions.center,
                             alpha = 1f,
                             style = stroke
                         )
                     holePositions.forEach { position ->
                         drawCircle(
                             color = Color.Black,
-                            radius = holeRadius,
+                            radius = dimensions.thickness / 2,
                             center = position,
                             alpha = 1f,
                             style = Fill
@@ -119,15 +121,22 @@ private fun ArcLine(
     )
 }
 
-private class SweepDimensions(val offset: Offset, val center: Offset, val startAngle: Float, val stepAngle: Float)
-private class ArcDimensions(val sweep: SweepDimensions, val radius: Float) {
-    fun arcOffset(index: Int) = Offset.unitFromAngle(
-        sweep.run {
-            stepAngle.times(index).plus(startAngle)
-        }
-    )
-        .times(radius)
-        .plus(sweep.center)
+private class ArcDimensions(
+    val segmentOffset: Offset,
+    val center: Offset,
+    val lineSpacing: Pair<Float, Float>,
+    val arcAngles: Pair<Float, Float>,
+    val outerRadius: Float,
+    val thickness: Float,
+) {
+    fun lineRadius(lineIndex: Int) = outerRadius - lineSpacing.run { first + (second * lineIndex) }
+    private fun holeAngle(holeIndex: Int): Float {
+        val t = (2 * holeIndex + 1) / 10f
+        return (1 - t) * arcAngles.first + t * arcAngles.second
+    }
 
-    fun boardOffset(index: Int) = arcOffset(index).plus(sweep.offset)
+    fun localHoleOffset(lineIndex: Int, holeIndex: Int) =
+        center + Offset.unitFromAngle(holeAngle(holeIndex)) * lineRadius(lineIndex)
+
+    fun globalHoleOffset(lineIndex: Int, holeIndex: Int) = localHoleOffset(lineIndex, holeIndex) + segmentOffset
 }

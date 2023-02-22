@@ -1,13 +1,31 @@
 package com.tainin.composablepegboard.pegboard.options
 
+import androidx.compose.ui.geometry.Offset
 import com.tainin.composablepegboard.model.LineOrder
 
 enum class LinearSegmentDirection {
-    LeftToRight,
-    RightToLeft;
+    North,
+    South,
+    East,
+    West,
+    ;
 
-    val lineOrder get() = when(this) {
-        LeftToRight -> LineOrder.Forward
-        RightToLeft -> LineOrder.Reverse
-    }
+    val peggingAxis
+        get() = when (this) {
+            North, South -> Offset(0f, 1f)
+            East, West -> Offset(1f, 0f)
+        }
+    val crossAxis
+        get() = when (this) {
+            North, South -> Offset(1f, 0f)
+            East, West -> Offset(0f, 1f)
+        }
+
+    val lineOrder
+        get() = when (this) {
+            North -> LineOrder.Reverse
+            South -> LineOrder.Forward
+            East -> LineOrder.Forward
+            West -> LineOrder.Reverse
+        }
 }

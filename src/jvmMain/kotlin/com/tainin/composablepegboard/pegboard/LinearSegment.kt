@@ -16,9 +16,11 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import com.tainin.composablepegboard.model.Game
-import com.tainin.composablepegboard.model.Player
 import com.tainin.composablepegboard.pegboard.options.LinearSegmentDirection
+import com.tainin.composablepegboard.pegboard.options.SegmentLineOptions
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
+import com.tainin.composablepegboard.utils.transform
+
 
 @Composable
 fun LinearSegment(
@@ -34,14 +36,24 @@ fun LinearSegment(
     var segmentOffset by remember { mutableStateOf(Offset.Zero) }
     var segmentSize by remember { mutableStateOf(Size.Zero) }
 
-    val dimensions = BoxDimensions(
-        offset = segmentOffset,
-        width = segmentSize.width,
-        startX = segmentSize.width / 10,
-        stepX = segmentSize.width / 5,
-    )
+    val (thickness, lineSpacing) = with(LocalDensity.current) {
+        streetOptions.run { lineThickness.toPx() to lineSpacing(game.playerCount).transform { it.toPx() } }
+    }
 
-    val insets = streetOptions.getLineInsets(game.playerCount)
+    val lineEnds = when (segmentDirection) {
+        LinearSegmentDirection.North -> segmentSize.height to 0f
+        LinearSegmentDirection.South -> 0f to segmentSize.height
+        LinearSegmentDirection.East -> 0f to segmentSize.width
+        LinearSegmentDirection.West -> segmentSize.width to 0f
+    }
+
+    val dimensions = LineDimensions(
+        segmentOffset = segmentOffset,
+        segmentDirection = segmentDirection,
+        lineSpacing = lineSpacing,
+        lineEnds = lineEnds,
+        thickness = thickness,
+    )
 
     Box(
         modifier = modifier
@@ -51,20 +63,17 @@ fun LinearSegment(
                 segmentSize = it.size.toSize()
             }
     ) {
-        val density = LocalDensity.current
-
-        val (yOffsets, lineThickness) = with(density) {
-            insets.map { it.toPx() } to streetOptions.lineThickness.toPx()
-        }
-
-        yOffsets
-            .zip(game[segmentDirection.lineOrder].asSequence())
-            .forEach { line ->
-                Line(
-                    player = line.second,
+        game[segmentDirection.lineOrder]
+            .forEachIndexed { lineIndex, player ->
+                val lineOptions = SegmentLineOptions(
                     segmentIndex = segmentIndex,
-                    dimensions = LineDimensions(dimensions, line.first),
-                    lineThickness = lineThickness,
+                    lineIndex = lineIndex,
+                    player = player,
+                )
+
+                LinearSegmentLine(
+                    lineOptions = lineOptions,
+                    dimensions = dimensions,
                     useHighlight = useHighlight,
                 )
             }
@@ -72,42 +81,38 @@ fun LinearSegment(
 }
 
 @Composable
-private fun Line(
-    player: Player,
-    segmentIndex: Int,
+private fun LinearSegmentLine(
+    lineOptions: SegmentLineOptions,
     dimensions: LineDimensions,
-    lineThickness: Float,
     useHighlight: Boolean,
 ) {
     ScoreToPositionUpdater(
-        keys = arrayOf(),
-        player = player,
-        segmentIndex = segmentIndex,
-    ) { i -> dimensions.boardOffset(i) }
+        keys = arrayOf(dimensions),
+        lineOptions = lineOptions,
+    ) { lineIndex, segmentOffset -> dimensions.globalHoleOffset(lineIndex, segmentOffset) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .drawWithCache {
-                val holePositions = List(5) { i -> dimensions.boxOffset(i) }
-                val holeRadius = lineThickness / 2
-                val line = dimensions.run {
-                    Offset(0f, yOffset) to Offset(box.width, yOffset)
+                val holePositions = List(5) { holeIndex ->
+                    dimensions.localHoleOffset(lineOptions.lineIndex, holeIndex)
                 }
+                val line = dimensions.lineEnds(lineOptions.lineIndex)
 
                 onDrawBehind {
                     if (useHighlight)
                         drawLine(
-                            color = player.color.highlightColor,
+                            color = lineOptions.player.color.highlightColor,
                             start = line.first,
                             end = line.second,
-                            strokeWidth = lineThickness,
+                            strokeWidth = dimensions.thickness,
                             alpha = 1f
                         )
                     holePositions.forEach { position ->
                         drawCircle(
                             color = Color.Black,
-                            radius = holeRadius,
+                            radius = dimensions.thickness / 2,
                             center = position,
                             alpha = 1f,
                             style = Fill
@@ -118,11 +123,25 @@ private fun Line(
     )
 }
 
-private class BoxDimensions(val offset: Offset, val width: Float, val startX: Float, val stepX: Float)
-private class LineDimensions(val box: BoxDimensions, val yOffset: Float) {
-    fun boxOffset(index: Int) = box.run {
-        stepX.times(index).plus(startX)
-    }.let { Offset(it, yOffset) }
+private class LineDimensions(
+    val segmentOffset: Offset,
+    val segmentDirection: LinearSegmentDirection,
+    val lineSpacing: Pair<Float, Float>,
+    val lineEnds: Pair<Float, Float>,
+    val thickness: Float,
+) {
+    private fun lineDistance(lineIndex: Int) = lineSpacing.run { first + (second * lineIndex) }
 
-    fun boardOffset(index: Int) = boxOffset(index).plus(box.offset)
+    private fun holeDistance(holeIndex: Int): Float {
+        val t = (2 * holeIndex + 1) / 10f
+        return (1 - t) * lineEnds.first + t * lineEnds.second
+    }
+
+    fun localHoleOffset(lineIndex: Int, holeIndex: Int) =
+        segmentDirection.run { peggingAxis * holeDistance(holeIndex) + crossAxis * lineDistance(lineIndex) }
+
+    fun lineEnds(lineIndex: Int) =
+        lineEnds.transform { end -> segmentDirection.run { peggingAxis * end + crossAxis * lineDistance(lineIndex) } }
+
+    fun globalHoleOffset(lineIndex: Int, holeIndex: Int) = localHoleOffset(lineIndex, holeIndex) + segmentOffset
 }

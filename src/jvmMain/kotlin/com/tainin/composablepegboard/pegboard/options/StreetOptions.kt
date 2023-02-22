@@ -1,19 +1,14 @@
 package com.tainin.composablepegboard.pegboard.options
 
 import androidx.compose.ui.unit.Dp
-import com.tainin.composablepegboard.utils.interpolate
+import androidx.compose.ui.unit.dp
 
 data class StreetOptions(val streetWidth: Dp, val lineThickness: Dp) {
-    fun getLineInsets(lineCount: Int) = sequence {
-        if (lineCount == 1) yield(streetWidth / 2)
-
-        val subCount = lineCount - 1
-        if (subCount <= 0) return@sequence
-
-        val low = lineThickness / 2
-        val high = streetWidth - (lineThickness / 2)
-        (0..subCount).forEach { i ->
-            yield(low.interpolate(high, i.toFloat() / subCount))
+    fun lineSpacing(lineCount: Int) =
+        require(lineCount > 0) {
+            "lineCount must be greater than 0."
+        }.let {
+            if (lineCount == 1) streetWidth / 2 to 0.dp
+            else lineThickness / 2 to (streetWidth - lineThickness) / lineCount.dec().coerceAtLeast(1)
         }
-    }
 }

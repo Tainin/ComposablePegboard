@@ -3,6 +3,8 @@ package com.tainin.composablepegboard.pegboard.options
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import com.tainin.composablepegboard.model.LineOrder
+import com.tainin.composablepegboard.utils.swap
+import com.tainin.composablepegboard.utils.transform
 import kotlin.math.PI
 import kotlin.math.min
 
@@ -28,7 +30,7 @@ enum class ArcFocus {
     Top,
     TopRight;
 
-    fun getClockwiseAngles() = getClockwiseStartIndex() * HALF_PI to getClockwiseSweepCount() * HALF_PI
+    fun getClockwiseAngles() = getClockwiseIndices().transform { it * HALF_PI }
 
     fun getRadius(size: Size) = when (this) {
         Top, Bottom -> .5f to 1f
@@ -48,16 +50,16 @@ enum class ArcFocus {
         TopRight -> Offset.Zero.copy(x = size.width)
     }
 
-    private fun getClockwiseStartIndex() = when (this) {
-        TopLeft, Top -> 0
-        TopRight, Right -> 1
-        BottomRight, Bottom -> 2
-        BottomLeft, Left -> 3
-    }
+    private fun getClockwiseIndices() = when (this) {
+        TopLeft -> 0 to 1
+        TopRight -> 1 to 2
+        BottomRight -> 2 to 3
+        BottomLeft -> 3 to 4
 
-    private fun getClockwiseSweepCount() = when (this) {
-        TopLeft, TopRight, BottomRight, BottomLeft -> 1
-        Top, Right, Bottom, Left -> 2
+        Top -> 0 to 2
+        Right -> 1 to 3
+        Bottom -> 2 to 4
+        Left -> 3 to 5
     }
 }
 
@@ -65,7 +67,7 @@ data class ArcSegmentOptions(val focus: ArcFocus, val direction: ArcDirection) {
     fun getAngles() = focus.getClockwiseAngles().let { angles ->
         when (direction) {
             ArcDirection.Clockwise -> angles
-            ArcDirection.AntiClockwise -> angles.first + angles.second to -angles.second
+            ArcDirection.AntiClockwise -> angles.swap()
         }
     }
 }

@@ -4,18 +4,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.geometry.Offset
-import com.tainin.composablepegboard.model.Player
+import com.tainin.composablepegboard.pegboard.options.SegmentLineOptions
 import com.tainin.composablepegboard.utils.toSegmentOffset
 
 @Composable
 fun ScoreToPositionUpdater(
     vararg keys: Any?,
-    player: Player,
-    segmentIndex: Int,
-    converter: (Int) -> Offset
+    lineOptions: SegmentLineOptions,
+    converter: (lineIndex: Int, segmentOffset: Int) -> Offset
 ) = LaunchedEffect(keys) {
-    snapshotFlow { player.score.pair }.collect { pair ->
-        pair.a.toSegmentOffset(segmentIndex)?.let { i -> player.pegPositions.a = converter(i) }
-        pair.b.toSegmentOffset(segmentIndex)?.let { i -> player.pegPositions.b = converter(i) }
+    snapshotFlow { lineOptions.player.score.pair }.collect { pair ->
+        pair.a.toSegmentOffset(lineOptions.segmentIndex)?.let { segOffset ->
+            lineOptions.player.pegPositions.a = converter(lineOptions.lineIndex, segOffset)
+        }
+        pair.b.toSegmentOffset(lineOptions.segmentIndex)?.let { segOffset ->
+            lineOptions.player.pegPositions.b = converter(lineOptions.lineIndex, segOffset)
+        }
     }
 }

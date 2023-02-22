@@ -3,6 +3,7 @@ package com.tainin.composablepegboard
 import androidx.compose.animation.core.EaseInQuint
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.AbsoluteAlignment
@@ -10,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.takeOrElse
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.input.key.KeyEventType
@@ -28,6 +30,8 @@ import com.tainin.composablepegboard.pegboard.ArcSegment
 import com.tainin.composablepegboard.pegboard.LinearSegment
 import com.tainin.composablepegboard.pegboard.options.*
 
+private const val LINEAR_SEGMENT_SCALE = 2.5f
+
 @Composable
 fun TestBoard(
     game: Game,
@@ -39,18 +43,52 @@ fun TestBoard(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.Gray)
             .onPlaced {
                 boardOffset = it.positionInRoot()
             }
     ) {
         LinearSegment(
             modifier = Modifier
-                .requiredSize(streetOptions.streetWidth.let { DpSize(it * 3, it) })
+                .requiredSize(streetOptions.streetWidth.let { DpSize(it * LINEAR_SEGMENT_SCALE, it) })
                 .align(AbsoluteAlignment.BottomRight),
             segmentIndex = 3,
             game = game,
             boardOffset = boardOffset,
-            segmentDirection = LinearSegmentDirection.LeftToRight,
+            segmentDirection = LinearSegmentDirection.West,
+            streetOptions = streetOptions,
+            useHighlight = true,
+        )
+        LinearSegment(
+            modifier = Modifier
+                .requiredSize(streetOptions.streetWidth.let { DpSize(it, it * LINEAR_SEGMENT_SCALE) })
+                .align(AbsoluteAlignment.BottomLeft),
+            segmentIndex = 4,
+            game = game,
+            boardOffset = boardOffset,
+            segmentDirection = LinearSegmentDirection.North,
+            streetOptions = streetOptions,
+            useHighlight = true,
+        )
+        LinearSegment(
+            modifier = Modifier
+                .requiredSize(streetOptions.streetWidth.let { DpSize(it * LINEAR_SEGMENT_SCALE, it) })
+                .align(AbsoluteAlignment.TopLeft),
+            segmentIndex = 5,
+            game = game,
+            boardOffset = boardOffset,
+            segmentDirection = LinearSegmentDirection.East,
+            streetOptions = streetOptions,
+            useHighlight = true,
+        )
+        LinearSegment(
+            modifier = Modifier
+                .requiredSize(streetOptions.streetWidth.let { DpSize(it, it * LINEAR_SEGMENT_SCALE) })
+                .align(AbsoluteAlignment.TopRight),
+            segmentIndex = 6,
+            game = game,
+            boardOffset = boardOffset,
+            segmentDirection = LinearSegmentDirection.South,
             streetOptions = streetOptions,
             useHighlight = true,
         )
@@ -132,6 +170,7 @@ fun TestBoard(
 
 fun main() = application {
     val game = remember {
+        //Game(PlayerColor.Red)
         //Game.makeTwoPlayerGame()
         Game.makeThreePlayerGame()
         //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple, PlayerColor.Yellow)
@@ -145,7 +184,7 @@ fun main() = application {
                 takeIf { it in (48L..57L) }?.minus(48) ?: return@Window false
             }
 
-            game[LineOrder.Forward][digit].score += listOf(1, 2, 3).random()
+            game[LineOrder.Forward][digit].score += listOf(1).random()
 
             true
         }
