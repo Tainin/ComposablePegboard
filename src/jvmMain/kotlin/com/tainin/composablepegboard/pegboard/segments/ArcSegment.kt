@@ -1,4 +1,4 @@
-package com.tainin.composablepegboard.pegboard
+package com.tainin.composablepegboard.pegboard.segments
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,24 +11,26 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Fill
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import com.tainin.composablepegboard.model.Game
-import com.tainin.composablepegboard.pegboard.options.LinearSegmentDirection
+import com.tainin.composablepegboard.pegboard.effects.ScoreToPositionUpdater
+import com.tainin.composablepegboard.pegboard.options.ArcSegmentOptions
 import com.tainin.composablepegboard.pegboard.options.SegmentLineOptions
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.utils.transform
-
+import com.tainin.composablepegboard.utils.unitFromAngle
 
 @Composable
-fun LinearSegment(
+fun ArcSegment(
     modifier: Modifier = Modifier,
     segmentIndex: Int,
     game: Game,
     boardOffset: Offset,
-    segmentDirection: LinearSegmentDirection,
+    arcSegmentOptions: ArcSegmentOptions,
     streetOptions: StreetOptions,
     useHighlight: Boolean,
 ) {
@@ -40,20 +42,16 @@ fun LinearSegment(
         streetOptions.run { lineThickness.toPx() to lineSpacing(game.playerCount).transform { it.toPx() } }
     }
 
-    val lineEnds = when (segmentDirection) {
-        LinearSegmentDirection.North -> segmentSize.height to 0f
-        LinearSegmentDirection.South -> 0f to segmentSize.height
-        LinearSegmentDirection.East -> 0f to segmentSize.width
-        LinearSegmentDirection.West -> segmentSize.width to 0f
+    val dimensions = arcSegmentOptions.run {
+        ArcDimensions(
+            segmentOffset = segmentOffset,
+            center = focus.getCenterOffset(segmentSize),
+            lineSpacing = lineSpacing,
+            arcAngles = getAngles(),
+            outerRadius = focus.getRadius(segmentSize),
+            thickness = thickness,
+        )
     }
-
-    val dimensions = LineDimensions(
-        segmentOffset = segmentOffset,
-        segmentDirection = segmentDirection,
-        lineSpacing = lineSpacing,
-        lineEnds = lineEnds,
-        thickness = thickness,
-    )
 
     Box(
         modifier = modifier
@@ -63,7 +61,7 @@ fun LinearSegment(
                 segmentSize = it.size.toSize()
             }
     ) {
-        game[segmentDirection.lineOrder]
+        game[arcSegmentOptions.direction.lineOrder]
             .forEachIndexed { lineIndex, player ->
                 val lineOptions = SegmentLineOptions(
                     segmentIndex = segmentIndex,
@@ -71,7 +69,7 @@ fun LinearSegment(
                     player = player,
                 )
 
-                LinearSegmentLine(
+                ArcSegmentLine(
                     lineOptions = lineOptions,
                     dimensions = dimensions,
                     useHighlight = useHighlight,
@@ -81,9 +79,9 @@ fun LinearSegment(
 }
 
 @Composable
-private fun LinearSegmentLine(
+private fun ArcSegmentLine(
     lineOptions: SegmentLineOptions,
-    dimensions: LineDimensions,
+    dimensions: ArcDimensions,
     useHighlight: Boolean,
 ) {
     ScoreToPositionUpdater(
@@ -98,16 +96,17 @@ private fun LinearSegmentLine(
                 val holePositions = List(5) { holeIndex ->
                     dimensions.localHoleOffset(lineOptions.lineIndex, holeIndex)
                 }
-                val line = dimensions.lineEnds(lineOptions.lineIndex)
+                val radius = dimensions.lineRadius(lineOptions.lineIndex)
+                val stroke = Stroke(dimensions.thickness)
 
                 onDrawBehind {
                     if (useHighlight)
-                        drawLine(
+                        drawCircle(
                             color = lineOptions.player.color.highlightColor,
-                            start = line.first,
-                            end = line.second,
-                            strokeWidth = dimensions.thickness,
-                            alpha = 1f
+                            radius = radius,
+                            center = dimensions.center,
+                            alpha = 1f,
+                            style = stroke
                         )
                     holePositions.forEach { position ->
                         drawCircle(
@@ -123,25 +122,22 @@ private fun LinearSegmentLine(
     )
 }
 
-private class LineDimensions(
+private class ArcDimensions(
     val segmentOffset: Offset,
-    val segmentDirection: LinearSegmentDirection,
+    val center: Offset,
     val lineSpacing: Pair<Float, Float>,
-    val lineEnds: Pair<Float, Float>,
+    val arcAngles: Pair<Float, Float>,
+    val outerRadius: Float,
     val thickness: Float,
 ) {
-    private fun lineDistance(lineIndex: Int) = lineSpacing.run { first + (second * lineIndex) }
-
-    private fun holeDistance(holeIndex: Int): Float {
+    fun lineRadius(lineIndex: Int) = outerRadius - lineSpacing.run { first + (second * lineIndex) }
+    private fun holeAngle(holeIndex: Int): Float {
         val t = (2 * holeIndex + 1) / 10f
-        return (1 - t) * lineEnds.first + t * lineEnds.second
+        return (1 - t) * arcAngles.first + t * arcAngles.second
     }
 
     fun localHoleOffset(lineIndex: Int, holeIndex: Int) =
-        segmentDirection.run { peggingAxis * holeDistance(holeIndex) + crossAxis * lineDistance(lineIndex) }
-
-    fun lineEnds(lineIndex: Int) =
-        lineEnds.transform { end -> segmentDirection.run { peggingAxis * end + crossAxis * lineDistance(lineIndex) } }
+        center + Offset.unitFromAngle(holeAngle(holeIndex)) * lineRadius(lineIndex)
 
     fun globalHoleOffset(lineIndex: Int, holeIndex: Int) = localHoleOffset(lineIndex, holeIndex) + segmentOffset
 }

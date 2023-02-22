@@ -1,4 +1,4 @@
-package com.tainin.composablepegboard.pegboard
+package com.tainin.composablepegboard.pegboard.segments
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,25 +11,25 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.toSize
 import com.tainin.composablepegboard.model.Game
-import com.tainin.composablepegboard.pegboard.options.ArcSegmentOptions
+import com.tainin.composablepegboard.pegboard.effects.ScoreToPositionUpdater
+import com.tainin.composablepegboard.pegboard.options.LinearSegmentDirection
 import com.tainin.composablepegboard.pegboard.options.SegmentLineOptions
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.utils.transform
-import com.tainin.composablepegboard.utils.unitFromAngle
+
 
 @Composable
-fun ArcSegment(
+fun LinearSegment(
     modifier: Modifier = Modifier,
     segmentIndex: Int,
     game: Game,
     boardOffset: Offset,
-    arcSegmentOptions: ArcSegmentOptions,
+    segmentDirection: LinearSegmentDirection,
     streetOptions: StreetOptions,
     useHighlight: Boolean,
 ) {
@@ -41,16 +41,20 @@ fun ArcSegment(
         streetOptions.run { lineThickness.toPx() to lineSpacing(game.playerCount).transform { it.toPx() } }
     }
 
-    val dimensions = arcSegmentOptions.run {
-        ArcDimensions(
-            segmentOffset = segmentOffset,
-            center = focus.getCenterOffset(segmentSize),
-            lineSpacing = lineSpacing,
-            arcAngles = getAngles(),
-            outerRadius = focus.getRadius(segmentSize),
-            thickness = thickness,
-        )
+    val lineEnds = when (segmentDirection) {
+        LinearSegmentDirection.North -> segmentSize.height to 0f
+        LinearSegmentDirection.South -> 0f to segmentSize.height
+        LinearSegmentDirection.East -> 0f to segmentSize.width
+        LinearSegmentDirection.West -> segmentSize.width to 0f
     }
+
+    val dimensions = LineDimensions(
+        segmentOffset = segmentOffset,
+        segmentDirection = segmentDirection,
+        lineSpacing = lineSpacing,
+        lineEnds = lineEnds,
+        thickness = thickness,
+    )
 
     Box(
         modifier = modifier
@@ -60,7 +64,7 @@ fun ArcSegment(
                 segmentSize = it.size.toSize()
             }
     ) {
-        game[arcSegmentOptions.direction.lineOrder]
+        game[segmentDirection.lineOrder]
             .forEachIndexed { lineIndex, player ->
                 val lineOptions = SegmentLineOptions(
                     segmentIndex = segmentIndex,
@@ -68,7 +72,7 @@ fun ArcSegment(
                     player = player,
                 )
 
-                ArcSegmentLine(
+                LinearSegmentLine(
                     lineOptions = lineOptions,
                     dimensions = dimensions,
                     useHighlight = useHighlight,
@@ -78,9 +82,9 @@ fun ArcSegment(
 }
 
 @Composable
-private fun ArcSegmentLine(
+private fun LinearSegmentLine(
     lineOptions: SegmentLineOptions,
-    dimensions: ArcDimensions,
+    dimensions: LineDimensions,
     useHighlight: Boolean,
 ) {
     ScoreToPositionUpdater(
@@ -95,17 +99,16 @@ private fun ArcSegmentLine(
                 val holePositions = List(5) { holeIndex ->
                     dimensions.localHoleOffset(lineOptions.lineIndex, holeIndex)
                 }
-                val radius = dimensions.lineRadius(lineOptions.lineIndex)
-                val stroke = Stroke(dimensions.thickness)
+                val line = dimensions.lineEnds(lineOptions.lineIndex)
 
                 onDrawBehind {
                     if (useHighlight)
-                        drawCircle(
+                        drawLine(
                             color = lineOptions.player.color.highlightColor,
-                            radius = radius,
-                            center = dimensions.center,
-                            alpha = 1f,
-                            style = stroke
+                            start = line.first,
+                            end = line.second,
+                            strokeWidth = dimensions.thickness,
+                            alpha = 1f
                         )
                     holePositions.forEach { position ->
                         drawCircle(
@@ -121,22 +124,25 @@ private fun ArcSegmentLine(
     )
 }
 
-private class ArcDimensions(
+private class LineDimensions(
     val segmentOffset: Offset,
-    val center: Offset,
+    val segmentDirection: LinearSegmentDirection,
     val lineSpacing: Pair<Float, Float>,
-    val arcAngles: Pair<Float, Float>,
-    val outerRadius: Float,
+    val lineEnds: Pair<Float, Float>,
     val thickness: Float,
 ) {
-    fun lineRadius(lineIndex: Int) = outerRadius - lineSpacing.run { first + (second * lineIndex) }
-    private fun holeAngle(holeIndex: Int): Float {
+    private fun lineDistance(lineIndex: Int) = lineSpacing.run { first + (second * lineIndex) }
+
+    private fun holeDistance(holeIndex: Int): Float {
         val t = (2 * holeIndex + 1) / 10f
-        return (1 - t) * arcAngles.first + t * arcAngles.second
+        return (1 - t) * lineEnds.first + t * lineEnds.second
     }
 
     fun localHoleOffset(lineIndex: Int, holeIndex: Int) =
-        center + Offset.unitFromAngle(holeAngle(holeIndex)) * lineRadius(lineIndex)
+        segmentDirection.run { peggingAxis * holeDistance(holeIndex) + crossAxis * lineDistance(lineIndex) }
+
+    fun lineEnds(lineIndex: Int) =
+        lineEnds.transform { end -> segmentDirection.run { peggingAxis * end + crossAxis * lineDistance(lineIndex) } }
 
     fun globalHoleOffset(lineIndex: Int, holeIndex: Int) = localHoleOffset(lineIndex, holeIndex) + segmentOffset
 }

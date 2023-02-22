@@ -1,4 +1,4 @@
-package com.tainin.composablepegboard.pegboard
+package com.tainin.composablepegboard.pegboard.effects
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

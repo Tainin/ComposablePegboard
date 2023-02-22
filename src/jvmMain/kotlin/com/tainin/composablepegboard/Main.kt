@@ -26,9 +26,9 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
-import com.tainin.composablepegboard.pegboard.ArcSegment
-import com.tainin.composablepegboard.pegboard.LinearSegment
 import com.tainin.composablepegboard.pegboard.options.*
+import com.tainin.composablepegboard.pegboard.segments.ArcSegment
+import com.tainin.composablepegboard.pegboard.segments.LinearSegment
 
 private const val LINEAR_SEGMENT_SCALE = 2.5f
 
@@ -43,7 +43,7 @@ fun TestBoard(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Gray)
+            .background(Color(145,90,60,255))
             .onPlaced {
                 boardOffset = it.positionInRoot()
             }
