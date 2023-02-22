@@ -1,19 +1,14 @@
 package com.tainin.composablepegboard
 
 import androidx.compose.animation.core.EaseInQuint
-import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.takeOrElse
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
@@ -27,6 +22,7 @@ import androidx.compose.ui.window.application
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.pegboard.options.*
+import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
 import com.tainin.composablepegboard.pegboard.segments.ArcSegment
 import com.tainin.composablepegboard.pegboard.segments.LinearSegment
 
@@ -43,7 +39,7 @@ fun TestBoard(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(145,90,60,255))
+            .background(Color(145, 90, 60, 255))
             .onPlaced {
                 boardOffset = it.positionInRoot()
             }
@@ -135,36 +131,15 @@ fun TestBoard(
             useHighlight = true,
         )
 
-        val animationSpec = tween<Offset>(
-            durationMillis = 500,
-            delayMillis = 0,
-            easing = EaseInQuint,
+        PegsOverlay(
+            game = game,
+            animationSpec = tween<Offset>(
+                durationMillis = 500,
+                delayMillis = 0,
+                easing = EaseInQuint,
+            ),
+            pegSize = 12.dp,
         )
-
-        game[LineOrder.Forward].forEach { player ->
-            val aPosition by animateOffsetAsState(
-                targetValue = player.pegPositions.a.takeOrElse { Offset.Zero },
-                animationSpec = animationSpec,
-            )
-
-            val bPosition by animateOffsetAsState(
-                targetValue = player.pegPositions.b.takeOrElse { Offset.Zero },
-                animationSpec = animationSpec,
-            )
-
-            fun DrawScope.drawPeg(offset: Offset) = drawCircle(
-                player.color.pegColor,
-                12f,
-                offset,
-                1f,
-                Fill
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .drawBehind { drawPeg(aPosition); drawPeg(bPosition) }
-            )
-        }
     }
 }
 
