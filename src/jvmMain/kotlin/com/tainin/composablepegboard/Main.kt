@@ -2,153 +2,30 @@ package com.tainin.composablepegboard
 
 import androidx.compose.animation.core.EaseInQuint
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.AbsoluteAlignment
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInRoot
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
-import com.tainin.composablepegboard.pegboard.options.*
+import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
+import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
-import com.tainin.composablepegboard.pegboard.segments.ArcSegment
-import com.tainin.composablepegboard.pegboard.segments.LinearSegment
-
-private const val LINEAR_SEGMENT_SCALE = 2.5f
-
-@Composable
-fun TestBoard(
-    game: Game,
-) {
-    val streetOptions = remember { StreetOptions(78.dp, 18.dp) }
-    //val streetOptions = remember { StreetOptions(64.dp, 16.dp) }
-    var boardOffset by remember { mutableStateOf(Offset.Zero) }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(145, 90, 60, 255))
-            .onPlaced {
-                boardOffset = it.positionInRoot()
-            }
-    ) {
-        LinearSegment(
-            modifier = Modifier
-                .requiredSize(streetOptions.streetWidth.let { DpSize(it * LINEAR_SEGMENT_SCALE, it) })
-                .align(AbsoluteAlignment.BottomRight),
-            segmentIndex = 3,
-            game = game,
-            boardOffset = boardOffset,
-            segmentDirection = LinearSegmentDirection.West,
-            streetOptions = streetOptions,
-            useHighlight = true,
-        )
-        LinearSegment(
-            modifier = Modifier
-                .requiredSize(streetOptions.streetWidth.let { DpSize(it, it * LINEAR_SEGMENT_SCALE) })
-                .align(AbsoluteAlignment.BottomLeft),
-            segmentIndex = 4,
-            game = game,
-            boardOffset = boardOffset,
-            segmentDirection = LinearSegmentDirection.North,
-            streetOptions = streetOptions,
-            useHighlight = true,
-        )
-        LinearSegment(
-            modifier = Modifier
-                .requiredSize(streetOptions.streetWidth.let { DpSize(it * LINEAR_SEGMENT_SCALE, it) })
-                .align(AbsoluteAlignment.TopLeft),
-            segmentIndex = 5,
-            game = game,
-            boardOffset = boardOffset,
-            segmentDirection = LinearSegmentDirection.East,
-            streetOptions = streetOptions,
-            useHighlight = true,
-        )
-        LinearSegment(
-            modifier = Modifier
-                .requiredSize(streetOptions.streetWidth.let { DpSize(it, it * LINEAR_SEGMENT_SCALE) })
-                .align(AbsoluteAlignment.TopRight),
-            segmentIndex = 6,
-            game = game,
-            boardOffset = boardOffset,
-            segmentDirection = LinearSegmentDirection.South,
-            streetOptions = streetOptions,
-            useHighlight = true,
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth(.5f)
-                .align(AbsoluteAlignment.CenterLeft)
-        ) {
-            ArcSegment(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(.5f),
-                segmentIndex = 0,
-                game = game,
-                boardOffset = boardOffset,
-                arcSegmentOptions = ArcSegmentOptions(ArcFocus.BottomRight, ArcDirection.AntiClockwise),
-                streetOptions = streetOptions,
-                useHighlight = true,
-            )
-
-            ArcSegment(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(1f),
-                segmentIndex = 1,
-                game = game,
-                boardOffset = boardOffset,
-                arcSegmentOptions = ArcSegmentOptions(ArcFocus.TopRight, ArcDirection.AntiClockwise),
-                streetOptions = streetOptions,
-                useHighlight = true,
-            )
-        }
-        ArcSegment(
-            modifier = Modifier
-                .fillMaxHeight(.5f)
-                .fillMaxWidth(.5f)
-                .align(AbsoluteAlignment.BottomRight),
-            segmentIndex = 2,
-            game = game,
-            boardOffset = boardOffset,
-            arcSegmentOptions = ArcSegmentOptions(ArcFocus.Left, ArcDirection.AntiClockwise),
-            streetOptions = streetOptions,
-            useHighlight = true,
-        )
-
-        PegsOverlay(
-            game = game,
-            animationSpec = tween<Offset>(
-                durationMillis = 500,
-                delayMillis = 0,
-                easing = EaseInQuint,
-            ),
-            pegSize = 12.dp,
-        )
-    }
-}
 
 fun main() = application {
     val game = remember {
         //Game(PlayerColor.Red)
         //Game.makeTwoPlayerGame()
         Game.makeThreePlayerGame()
-        //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple, PlayerColor.Yellow)
+        //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
     }
 
     Window(
@@ -159,11 +36,33 @@ fun main() = application {
                 takeIf { it in (48L..57L) }?.minus(48) ?: return@Window false
             }
 
-            game[LineOrder.Forward][digit].score += listOf(1).random()
+            game[LineOrder.Forward][digit].score += listOf(1,2,3,4,5).random()
 
             true
         }
     ) {
-        TestBoard(game = game)
+        Box(
+            modifier = Modifier
+                .wrapContentSize()
+        ) {
+            RectangularSpiralBoard(
+                boardOffset = Offset.Zero,
+                streetOptions = StreetOptions(72.dp, 16.dp),
+                streetSpacing = 64.dp,
+                segmentGap = 16.dp,
+                segmentAspectRatio = 2.5f,
+                game = game,
+                useHighlight = true,
+            )
+            PegsOverlay(
+                game = game,
+                animationSpec = tween(
+                    durationMillis = 500,
+                    delayMillis = 0,
+                    easing = EaseInQuint,
+                ),
+                pegSize = 12.dp,
+            )
+        }
     }
 }
