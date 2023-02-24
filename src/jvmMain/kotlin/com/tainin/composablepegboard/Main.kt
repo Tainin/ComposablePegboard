@@ -3,10 +3,12 @@ package com.tainin.composablepegboard
 import androidx.compose.animation.core.EaseInBack
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -58,6 +60,18 @@ fun main() = application {
                 .fillMaxSize()
         ) {
             var boardOffset by remember { mutableStateOf(Offset.Zero) }
+
+            Column(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .align(AbsoluteAlignment.TopLeft)
+            ) {
+                game[LineOrder.Forward].forEach { player ->
+                    Text(
+                        text = player.score.history.joinToString(", ")
+                    )
+                }
+            }
 
             Box(
                 modifier = Modifier
