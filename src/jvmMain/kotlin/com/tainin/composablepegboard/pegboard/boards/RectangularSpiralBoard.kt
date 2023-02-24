@@ -136,11 +136,10 @@ fun RectangularSpiralBoard(
     }
 
     @Composable
-    fun BoxScope.boardHelper() = Row(
+    fun boardHelper() = Row(
         modifier = Modifier
             .wrapContentWidth()
-            .requiredHeight(IntrinsicSize.Min)
-            .align(Alignment.Center),
+            .requiredHeight(IntrinsicSize.Min),
     ) {
         Column(
             modifier = Modifier
@@ -170,10 +169,5 @@ fun RectangularSpiralBoard(
         rightEndCurve(7)
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        boardHelper()
-    }
+    boardHelper()
 }
