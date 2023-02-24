@@ -1,6 +1,6 @@
 package com.tainin.composablepegboard
 
-import androidx.compose.animation.core.EaseInQuint
+import androidx.compose.animation.core.EaseInBack
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.getValue
@@ -10,10 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.nativeKeyCode
-import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.DpSize
@@ -24,6 +21,17 @@ import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
+
+fun debugKeyEventHandler(game: Game, keyEvent: KeyEvent): Boolean {
+    if (keyEvent.type != KeyEventType.KeyDown) return false
+    val digit = keyEvent.key.nativeKeyCode.run {
+        takeIf { it in (48L..57L) }?.minus(48) ?: return false
+    }
+
+    game[LineOrder.Forward][digit].score += listOf(1, 2, 3, 4, 5).random()
+
+    return true
+}
 
 fun main() = application {
     val game = remember {
@@ -43,16 +51,7 @@ fun main() = application {
     Window(
         state = windowState,
         onCloseRequest = ::exitApplication,
-        onKeyEvent = { keyEvent ->
-            if (keyEvent.type != KeyEventType.KeyDown) return@Window false
-            val digit = keyEvent.key.nativeKeyCode.run {
-                takeIf { it in (48L..57L) }?.minus(48) ?: return@Window false
-            }
-
-            game[LineOrder.Forward][digit].score += listOf(1, 2, 3, 4, 5).random()
-
-            true
-        }
+        onKeyEvent = { keyEvent -> debugKeyEventHandler(game, keyEvent) },
     ) {
         Box(
             modifier = Modifier
@@ -81,11 +80,11 @@ fun main() = application {
                 PegsOverlay(
                     game = game,
                     animationSpec = tween(
-                        durationMillis = 500,
+                        durationMillis = 1000,
                         delayMillis = 0,
-                        easing = EaseInQuint,
+                        easing = EaseInBack,
                     ),
-                    pegSize = 12.dp,
+                    pegSize = 27.dp,
                 )
             }
         }
