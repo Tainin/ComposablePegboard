@@ -11,6 +11,7 @@ import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.pegboard.options.*
 import com.tainin.composablepegboard.pegboard.segments.ArcSegment
 import com.tainin.composablepegboard.pegboard.segments.LinearSegment
+import com.tainin.composablepegboard.pegboard.segments.StartSegment
 
 @Composable
 fun RectangularSpiralBoard(
@@ -136,6 +137,23 @@ fun RectangularSpiralBoard(
     }
 
     @Composable
+    fun startArea() {
+        StartSegment(
+            modifier = Modifier
+                .requiredSize(streetOptions.streetWidth),
+            game = game,
+            boardOffset = boardOffset,
+            segmentDirection = LinearSegmentDirection.East,
+            streetOptions = streetOptions,
+            useHighlight = useHighlight,
+        )
+        Box(
+            modifier = Modifier
+                .requiredSize(segmentGap, streetOptions.streetWidth)
+        )
+    }
+
+    @Composable
     fun boardHelper() = Row(
         modifier = Modifier
             .wrapContentWidth()
@@ -147,7 +165,15 @@ fun RectangularSpiralBoard(
             verticalArrangement = Arrangement.spacedBy(streetSpacing),
             horizontalAlignment = AbsoluteAlignment.Right,
         ) {
-            longStreet(0, 7, false)
+            Row(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .requiredHeight(IntrinsicSize.Min),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                startArea()
+                longStreet(0, 7, false)
+            }
             Row(
                 modifier = Modifier
                     .wrapContentWidth()
