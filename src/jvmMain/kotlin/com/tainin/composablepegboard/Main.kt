@@ -35,7 +35,7 @@ fun debugKeyEventHandler(game: Game, keyEvent: KeyEvent): Boolean {
     game[LineOrder.Forward][digit].score.run {
         when {
             keyEvent.isShiftPressed -> pop()
-            game.ongoing() -> plusAssign(listOf(1, 2, 3, 4, 5).random())
+            game.ongoing -> plusAssign(listOf(1, 2, 3, 4, 5).random())
             else -> Unit
         }
     }
@@ -47,7 +47,7 @@ fun main() = application {
     val game = remember {
         //Game(PlayerColor.Purple)
         //Game.makeTwoPlayerGame()
-        Game.makeThreePlayerGame()
+        Game.makeThreePlayerGame(121)
         //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
     }
 

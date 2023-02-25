@@ -5,22 +5,22 @@ enum class LineOrder {
     Reverse,
 }
 
-class Game(vararg colors: PlayerColor) {
+class Game(private val winningScore: Int, vararg colors: PlayerColor) {
     private val players = sequence {
         colors.forEach { yield(Player.makeForColor(it)) }
     }.toList()
 
     private val reversed = players.asReversed()
     val playerCount = players.size
-    fun withWinner(action: (Player) -> Unit) =
-        players.find { it.score.pair.lead > 120 }?.let { action(it); true } ?: false
 
-    fun hasWinner() = withWinner { /* no-op */ }
-    fun ongoing() = !hasWinner()
+    private val winner get() = players.find { it.score.pair.lead >= winningScore }
+    val hasWinner get() = winner?.let { true } ?: false
+    val ongoing get() = winner?.let { false } ?: true
+    fun withWinner(action: (Player) -> Unit) = winner?.let { action(it); true } ?: false
 
     companion object {
-        fun makeTwoPlayerGame() = Game(PlayerColor.Red, PlayerColor.Blue)
-        fun makeThreePlayerGame() = Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue)
+        fun makeTwoPlayerGame(winningScore: Int) = Game(winningScore, PlayerColor.Red, PlayerColor.Blue)
+        fun makeThreePlayerGame(winningScore: Int) = Game(winningScore, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue)
     }
 
     operator fun get(order: LineOrder) = when (order) {

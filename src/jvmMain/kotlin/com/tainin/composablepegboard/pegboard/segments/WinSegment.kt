@@ -14,6 +14,7 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.toSize
 import com.tainin.composablepegboard.model.Game
+import com.tainin.composablepegboard.pegboard.effects.WinPositionUpdater
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 
 @Composable
@@ -31,16 +32,11 @@ fun WinSegment(
     val globalSegmentCenter = segmentOffset + localSegmentCenter
     val radius = segmentSize.minDimension / 2
 
-    LaunchedEffect(globalSegmentCenter) {
-        snapshotFlow { game.hasWinner() }.collect { _ ->
-            game.withWinner { player ->
-                when(player.score.pair.lead) {
-                    player.score.pair.a -> player.pegPositions.a = globalSegmentCenter
-                    player.score.pair.b -> player.pegPositions.b = globalSegmentCenter
-                }
-            }
-        }
-    }
+    WinPositionUpdater(
+        keys = arrayOf(globalSegmentCenter),
+        game = game,
+        pegPosition = globalSegmentCenter,
+    )
 
     Box(
         modifier = modifier
