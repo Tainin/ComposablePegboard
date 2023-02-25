@@ -1,6 +1,6 @@
 package com.tainin.composablepegboard
 
-import androidx.compose.animation.core.EaseInBack
+import androidx.compose.animation.core.EaseInOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -28,9 +28,17 @@ fun debugKeyEventHandler(game: Game, keyEvent: KeyEvent): Boolean {
     if (keyEvent.type != KeyEventType.KeyDown) return false
     val digit = keyEvent.key.nativeKeyCode.run {
         takeIf { it in (48L..57L) }?.minus(48) ?: return false
-    }
+    }.dec()
 
-    game[LineOrder.Forward][digit].score += listOf(1, 2, 3, 4, 5).random()
+    if (digit !in game[LineOrder.Forward].indices) return false
+
+    game[LineOrder.Forward][digit].score.run {
+        when {
+            keyEvent.isShiftPressed -> pop()
+            game.ongoing() -> plusAssign(listOf(1, 2, 3, 4, 5).random())
+            else -> Unit
+        }
+    }
 
     return true
 }
@@ -47,7 +55,7 @@ fun main() = application {
         placement = WindowPlacement.Floating,
         isMinimized = false,
         position = WindowPosition(alignment = Alignment.Center),
-        size = DpSize(1920.dp, 600.dp)
+        size = DpSize(1920.dp, 800.dp)
     )
 
     Window(
@@ -68,7 +76,7 @@ fun main() = application {
             ) {
                 game[LineOrder.Forward].forEach { player ->
                     Text(
-                        text = player.score.history.joinToString(", ")
+                        text = player.score.history.take(10).joinToString(", ")
                     )
                 }
             }
@@ -96,9 +104,9 @@ fun main() = application {
                     animationSpec = tween(
                         durationMillis = 1000,
                         delayMillis = 0,
-                        easing = EaseInBack,
+                        easing = EaseInOutBack,
                     ),
-                    pegSize = 27.dp,
+                    pegSize = 24.dp,
                 )
             }
         }

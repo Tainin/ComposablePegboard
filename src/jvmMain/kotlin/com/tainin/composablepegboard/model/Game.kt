@@ -12,13 +12,18 @@ class Game(vararg colors: PlayerColor) {
 
     private val reversed = players.asReversed()
     val playerCount = players.size
+    fun withWinner(action: (Player) -> Unit) =
+        players.find { it.score.pair.lead > 120 }?.let { action(it); true } ?: false
+
+    fun hasWinner() = withWinner { /* no-op */ }
+    fun ongoing() = !hasWinner()
 
     companion object {
         fun makeTwoPlayerGame() = Game(PlayerColor.Red, PlayerColor.Blue)
         fun makeThreePlayerGame() = Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue)
     }
 
-    operator fun get(order: LineOrder) = when(order) {
+    operator fun get(order: LineOrder) = when (order) {
         LineOrder.Forward -> players
         LineOrder.Reverse -> reversed
     }
