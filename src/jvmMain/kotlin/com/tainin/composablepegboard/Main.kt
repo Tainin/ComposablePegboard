@@ -4,10 +4,7 @@ import androidx.compose.animation.core.EaseInOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,20 +40,72 @@ fun debugKeyEventHandler(game: Game, keyEvent: KeyEvent): Boolean {
     return true
 }
 
-fun main() = application {
-    val game = remember {
-        //Game(PlayerColor.Purple)
-        //Game.makeTwoPlayerGame()
-        Game.makeThreePlayerGame(121)
-        //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
-    }
+@Composable
+fun BoxScope.GameBoard(game: Game) {
+    var boardOffset by remember { mutableStateOf(Offset.Zero) }
 
-    val windowState = rememberWindowState(
-        placement = WindowPlacement.Floating,
-        isMinimized = false,
-        position = WindowPosition(alignment = Alignment.Center),
-        size = DpSize(1920.dp, 800.dp)
-    )
+    Box(
+        modifier = Modifier
+            .requiredHeight(IntrinsicSize.Min)
+            .requiredWidth(IntrinsicSize.Min)
+            .align(Alignment.Center)
+            .onPlaced {
+                boardOffset = it.positionInRoot()
+            }
+    ) {
+        RectangularSpiralBoard(
+            boardOffset = boardOffset,
+            streetOptions = StreetOptions(72.dp, 16.dp),
+            streetSpacing = 64.dp,
+            segmentGap = 16.dp,
+            segmentAspectRatio = 2.5f,
+            game = game,
+            useHighlight = true,
+        )
+        PegsOverlay(
+            game = game,
+            animationSpec = tween(
+                durationMillis = 1000,
+                delayMillis = 0,
+                easing = EaseInOutBack,
+            ),
+            pegSize = 24.dp,
+        )
+    }
+}
+
+@Composable
+fun BoxScope.DebugScoreHistory(game: Game) = Column(
+    modifier = Modifier
+        .wrapContentSize()
+        .align(AbsoluteAlignment.TopLeft)
+) {
+    game[LineOrder.Forward].forEach { player ->
+        Text(
+            text = player.score.history.take(10).joinToString(", ")
+        )
+    }
+}
+
+@Composable
+fun rememberGame() = remember {
+    //Game(PlayerColor.Purple)
+    //Game.makeTwoPlayerGame()
+    Game.makeThreePlayerGame(121)
+    //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
+}
+
+@Composable
+fun rememberGameWindowState() = rememberWindowState(
+    placement = WindowPlacement.Floating,
+    isMinimized = false,
+    position = WindowPosition(alignment = Alignment.Center),
+    size = DpSize(1920.dp, 800.dp)
+)
+
+fun main() = application {
+    val game = rememberGame()
+    val windowState = rememberGameWindowState()
 
     Window(
         state = windowState,
@@ -64,51 +113,10 @@ fun main() = application {
         onKeyEvent = { keyEvent -> debugKeyEventHandler(game, keyEvent) },
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
-            var boardOffset by remember { mutableStateOf(Offset.Zero) }
-
-            Column(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .align(AbsoluteAlignment.TopLeft)
-            ) {
-                game[LineOrder.Forward].forEach { player ->
-                    Text(
-                        text = player.score.history.take(10).joinToString(", ")
-                    )
-                }
-            }
-
-            Box(
-                modifier = Modifier
-                    .requiredHeight(IntrinsicSize.Min)
-                    .requiredWidth(IntrinsicSize.Min)
-                    .align(Alignment.Center)
-                    .onPlaced {
-                        boardOffset = it.positionInRoot()
-                    }
-            ) {
-                RectangularSpiralBoard(
-                    boardOffset = boardOffset,
-                    streetOptions = StreetOptions(72.dp, 16.dp),
-                    streetSpacing = 64.dp,
-                    segmentGap = 16.dp,
-                    segmentAspectRatio = 2.5f,
-                    game = game,
-                    useHighlight = true,
-                )
-                PegsOverlay(
-                    game = game,
-                    animationSpec = tween(
-                        durationMillis = 1000,
-                        delayMillis = 0,
-                        easing = EaseInOutBack,
-                    ),
-                    pegSize = 24.dp,
-                )
-            }
+            GameBoard(game)
+            DebugScoreHistory(game)
         }
     }
 }
