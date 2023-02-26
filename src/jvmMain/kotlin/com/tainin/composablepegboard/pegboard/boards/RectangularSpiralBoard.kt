@@ -1,19 +1,19 @@
 package com.tainin.composablepegboard.pegboard.boards
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.sp
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.pegboard.options.*
-import com.tainin.composablepegboard.pegboard.segments.ArcSegment
-import com.tainin.composablepegboard.pegboard.segments.LinearSegment
-import com.tainin.composablepegboard.pegboard.segments.StartSegment
-import com.tainin.composablepegboard.pegboard.segments.WinSegment
+import com.tainin.composablepegboard.pegboard.segments.*
 
 @Composable
 fun RectangularSpiralBoard(
@@ -25,6 +25,31 @@ fun RectangularSpiralBoard(
     game: Game,
     useHighlight: Boolean,
 ) {
+    @Composable
+    fun segmentSeparator(
+        segmentIndex: Int,
+        labelPosition: LinearSegmentDirection,
+    ) = SegmentSeparator(
+        modifier = Modifier
+            .requiredSize(
+                when (labelPosition) {
+                    LinearSegmentDirection.North, LinearSegmentDirection.South ->
+                        DpSize(segmentGap, streetOptions.streetWidth)
+
+                    LinearSegmentDirection.East, LinearSegmentDirection.West ->
+                        DpSize(streetOptions.streetWidth, segmentGap)
+                }
+            ),
+        labelPosition = labelPosition,
+        lineThickness = segmentGap / 3,
+    ) {
+        Text(
+            text = segmentIndex.takeUnless { it == 18 }?.times(5)?.toString() ?: "S",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold,
+        )
+    }
+
     @Composable
     fun arcSegment(
         modifier: Modifier,
@@ -42,10 +67,6 @@ fun RectangularSpiralBoard(
 
     @Composable
     fun winnerArea() {
-        Box(
-            modifier = Modifier
-                .requiredSize(segmentGap, streetOptions.streetWidth)
-        )
         WinSegment(
             modifier = Modifier.requiredSize(streetOptions.streetWidth),
             game = game,
@@ -56,22 +77,30 @@ fun RectangularSpiralBoard(
     }
 
     @Composable
-    fun rightEndCurve(
+    fun eastEndCurve(
         baseSegmentIndex: Int,
     ) = Row(
         modifier = Modifier
             .fillMaxHeight()
             .wrapContentWidth(),
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .wrapContentWidth(),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            listOf(7, 24, 9).forEach { i ->
+                segmentSeparator(
+                    segmentIndex = i,
+                    labelPosition = LinearSegmentDirection.South,
+                )
+            }
+        }
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .requiredWidth(segmentGap)
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .aspectRatio(0.5f, true)
+                .wrapContentWidth()
         ) {
             Box(
                 modifier = Modifier
@@ -82,24 +111,25 @@ fun RectangularSpiralBoard(
             }
             Column(
                 modifier = Modifier
-                    .fillMaxSize(),
+                    .fillMaxHeight()
+                    .wrapContentWidth(),
                 horizontalAlignment = AbsoluteAlignment.Right,
             ) {
                 arcSegment(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth(),
+                        .aspectRatio(1f),
                     segmentIndex = baseSegmentIndex + 0,
                     arcSegmentOptions = ArcSegmentOptions(ArcFocus.BottomLeft, ArcDirection.Clockwise),
                 )
-                Box(
-                    modifier = Modifier
-                        .requiredSize(streetOptions.streetWidth, segmentGap)
+                segmentSeparator(
+                    segmentIndex = baseSegmentIndex + 1,
+                    labelPosition = LinearSegmentDirection.West,
                 )
                 arcSegment(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxWidth(),
+                        .aspectRatio(1f),
                     segmentIndex = baseSegmentIndex + 1,
                     arcSegmentOptions = ArcSegmentOptions(ArcFocus.TopLeft, ArcDirection.Clockwise),
                 )
@@ -108,7 +138,7 @@ fun RectangularSpiralBoard(
     }
 
     @Composable
-    fun leftEndCurve(
+    fun westEndCurve(
         baseSegmentIndex: Int,
     ) = Row(
         modifier = Modifier
@@ -122,11 +152,21 @@ fun RectangularSpiralBoard(
             segmentIndex = baseSegmentIndex,
             arcSegmentOptions = ArcSegmentOptions(ArcFocus.Right, ArcDirection.Clockwise),
         )
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .requiredWidth(segmentGap)
-        )
+                .wrapContentWidth(),
+            verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+            segmentSeparator(
+                segmentIndex = baseSegmentIndex + 1,
+                labelPosition = LinearSegmentDirection.South,
+            )
+            segmentSeparator(
+                segmentIndex = baseSegmentIndex + 0,
+                labelPosition = LinearSegmentDirection.South,
+            )
+        }
     }
 
     @Composable
@@ -144,10 +184,11 @@ fun RectangularSpiralBoard(
         val range = (0 until segmentCount).let { if (reverse) it.reversed() else it }
 
         range.forEach { i ->
+            val segmentIndex = baseSegmentIndex + i
             if (i != range.first)
-                Box(
-                    modifier = Modifier
-                        .requiredSize(segmentGap, streetOptions.streetWidth)
+                segmentSeparator(
+                    segmentIndex = segmentIndex + if (reverse) 1 else 0,
+                    labelPosition = LinearSegmentDirection.South,
                 )
             LinearSegment(
                 modifier = Modifier
@@ -155,7 +196,7 @@ fun RectangularSpiralBoard(
                         width = width,
                         height = streetOptions.streetWidth,
                     ),
-                segmentIndex = baseSegmentIndex + i,
+                segmentIndex = segmentIndex,
                 game = game,
                 boardOffset = boardOffset,
                 segmentDirection = segmentDirection,
@@ -178,9 +219,9 @@ fun RectangularSpiralBoard(
             streetOptions = streetOptions,
             useHighlight = useHighlight,
         )
-        Box(
-            modifier = Modifier
-                .requiredSize(segmentGap, streetOptions.streetWidth)
+        segmentSeparator(
+            segmentIndex = 0,
+            labelPosition = LinearSegmentDirection.South,
         )
     }
 
@@ -211,7 +252,7 @@ fun RectangularSpiralBoard(
                     .requiredHeight(IntrinsicSize.Min),
                 verticalAlignment = Alignment.Bottom,
             ) {
-                leftEndCurve(16)
+                westEndCurve(16)
                 Column(
                     modifier = Modifier
                         .wrapContentSize(),
@@ -223,7 +264,7 @@ fun RectangularSpiralBoard(
                 }
             }
         }
-        rightEndCurve(7)
+        eastEndCurve(7)
     }
 
     boardHelper()
