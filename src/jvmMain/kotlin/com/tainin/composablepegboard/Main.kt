@@ -56,7 +56,7 @@ fun BoxScope.GameBoard(game: Game) {
         RectangularSpiralBoard(
             boardOffset = boardOffset,
             streetOptions = StreetOptions(72.dp, 16.dp),
-            streetSpacing = 64.dp,
+            streetSpacing = 72.dp,
             segmentGap = 16.dp,
             segmentAspectRatio = 2.5f,
             game = game,
@@ -89,10 +89,10 @@ fun BoxScope.DebugScoreHistory(game: Game) = Column(
 
 @Composable
 fun rememberGame() = remember {
-    //Game(PlayerColor.Purple)
-    //Game.makeTwoPlayerGame()
+    //Game(121, PlayerColor.Purple)
+    //Game.makeTwoPlayerGame(121)
     Game.makeThreePlayerGame(121)
-    //Game(PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
+    //Game(121, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
 }
 
 @Composable
