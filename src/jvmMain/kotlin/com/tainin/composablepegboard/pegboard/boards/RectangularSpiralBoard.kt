@@ -10,8 +10,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tainin.composablepegboard.model.Game
+import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.pegboard.options.*
 import com.tainin.composablepegboard.pegboard.segments.*
 
@@ -208,6 +210,29 @@ fun RectangularSpiralBoard(
 
     @Composable
     fun startArea() {
+        Box(
+            modifier = Modifier
+                .requiredWidth(32.dp)
+                .requiredHeight(streetOptions.streetWidth)
+        ) {
+            Column(
+                modifier = Modifier
+                    .wrapContentSize(unbounded = true)
+                    .align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+            ) {
+                game[LineOrder.Forward].indices.forEach { playerIndex ->
+                    Text(
+                        modifier = Modifier
+                            .wrapContentSize(),
+                        text = playerIndex.inc().toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+        }
         StartSegment(
             modifier = Modifier
                 .requiredSize(
