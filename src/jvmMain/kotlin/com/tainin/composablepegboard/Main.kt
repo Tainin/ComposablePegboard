@@ -31,23 +31,22 @@ import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
 
 
 @Composable
-fun BoxScope.GameBoard(game: Game) {
+fun GameBoard(game: Game) {
     var boardOffset by remember { mutableStateOf(Offset.Zero) }
 
     Box(
         modifier = Modifier
             .requiredHeight(IntrinsicSize.Min)
             .requiredWidth(IntrinsicSize.Min)
-            .align(Alignment.Center)
             .onPlaced {
                 boardOffset = it.positionInRoot()
             }
     ) {
         RectangularSpiralBoard(
             boardOffset = boardOffset,
-            streetOptions = StreetOptions(72.dp, 16.dp),
-            streetSpacing = 72.dp,
-            segmentGap = 16.dp,
+            streetOptions = StreetOptions(64.dp, 12.dp),
+            streetSpacing = 68.dp,
+            segmentGap = 12.dp,
             segmentAspectRatio = 2.5f,
             game = game,
             useHighlight = true,
@@ -56,10 +55,10 @@ fun BoxScope.GameBoard(game: Game) {
             game = game,
             animationSpec = tween(
                 durationMillis = 1000,
-                delayMillis = 0,
+                delayMillis = 200,
                 easing = EaseInOutBack,
             ),
-            pegSize = 24.dp,
+            pegSize = 20.dp,
         )
     }
 }
@@ -82,9 +81,8 @@ fun BoxScope.UserScoreInputDialog(userScoreInput: UserScoreInput) {
     if (userScoreInput.hasSelectedPlayer) {
         Box(
             modifier = Modifier
-                .padding(96.dp)
                 .requiredSize(800.dp, 300.dp)
-                .align(Alignment.BottomCenter)
+                .align(Alignment.Center)
                 .clip(RoundedCornerShape(32.dp))
                 .background(Color.Black)
         ) {
@@ -116,6 +114,25 @@ fun BoxScope.UserScoreInputDialog(userScoreInput: UserScoreInput) {
 }
 
 @Composable
+fun GameWindow(
+    game: Game,
+    userScoreInput: UserScoreInput,
+) = Box(
+    modifier = Modifier.fillMaxSize()
+) {
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+            .align(Alignment.BottomCenter)
+            .padding(bottom = 128.dp)
+    ) {
+        GameBoard(game)
+        UserScoreInputDialog(userScoreInput)
+    }
+    DebugScoreHistory(game)
+}
+
+@Composable
 fun rememberGame() = remember {
     //Game(121, PlayerColor.Purple)
     //Game.makeTwoPlayerGame(121)
@@ -128,8 +145,9 @@ fun rememberGameWindowState() = rememberWindowState(
     placement = WindowPlacement.Floating,
     isMinimized = false,
     position = WindowPosition(alignment = Alignment.Center),
-    size = DpSize(1920.dp, 800.dp)
+    size = DpSize(1800.dp, 1000.dp)
 )
+
 @Composable
 fun rememberUserScoreInput(game: Game) = remember { UserScoreInput(game) }
 
@@ -143,12 +161,6 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         onKeyEvent = { keyEvent -> userScoreInput.applyKeyEvent(keyEvent) },
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            GameBoard(game)
-            DebugScoreHistory(game)
-            UserScoreInputDialog(userScoreInput)
-        }
+        GameWindow(game, userScoreInput)
     }
 }
