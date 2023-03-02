@@ -220,7 +220,7 @@ fun RectangularSpiralBoard(
                     .wrapContentSize(unbounded = true)
                     .align(Alignment.Center),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
             ) {
                 game[LineOrder.Forward].indices.forEach { playerIndex ->
                     Text(

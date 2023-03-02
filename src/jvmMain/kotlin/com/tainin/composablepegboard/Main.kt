@@ -77,40 +77,48 @@ fun BoxScope.DebugScoreHistory(game: Game) = Column(
 }
 
 @Composable
-fun BoxScope.UserScoreInputDialog(userScoreInput: UserScoreInput) {
-    if (userScoreInput.hasSelectedPlayer) {
-        Box(
-            modifier = Modifier
-                .requiredSize(800.dp, 300.dp)
-                .align(Alignment.Center)
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color.Black)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(64.dp)
-                    .border(
-                        width = 8.dp,
-                        color = userScoreInput.selectedPlayer!!.color.pegColor,
-                        shape = RoundedCornerShape(32.dp)
-                    )
+fun PlayerScoreDisplay(
+    frameColor: Color,
+    scoreText: String,
+) = Box(
+    modifier = Modifier
+        .requiredSize(400.dp, 150.dp)
+        .clip(RoundedCornerShape(32.dp))
+        .border(
+            width = 4.dp,
+            color = Color.Black,
+            shape = RoundedCornerShape(321.dp)
+        )
+        //.background(Color.Black)
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(64.dp)
+            .border(
+                width = 8.dp,
+                color = frameColor,
+                shape = RoundedCornerShape(32.dp)
             )
-            Text(
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .requiredWidth(500.dp)
-                    .align(Alignment.Center)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White)
-                    .padding(16.dp),
-                text = userScoreInput.inputValue.toString(),
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
+    )
+    Text(
+        modifier = Modifier
+            .wrapContentHeight()
+            .requiredWidth(200.dp)
+            .align(Alignment.Center)
+            //.clip(RoundedCornerShape(16.dp))
+            .border(
+                width = 4.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(16.dp)
             )
-        }
-    }
+            .background(Color.White)
+            .padding(16.dp),
+        text = scoreText,
+        fontSize = 36.sp,
+        fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
+    )
 }
 
 @Composable
@@ -127,9 +135,37 @@ fun GameWindow(
             .padding(bottom = 128.dp)
     ) {
         GameBoard(game)
-        UserScoreInputDialog(userScoreInput)
     }
-    DebugScoreHistory(game)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .align(Alignment.TopCenter),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(32.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .wrapContentSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(32.dp)
+        ) {
+            game[LineOrder.Forward].forEach {
+                PlayerScoreDisplay(
+                    it.color.pegColor,
+                    it.score.pair.lead.toString(),
+                )
+            }
+        }
+        userScoreInput.selectedPlayer?.let {
+            PlayerScoreDisplay(
+                it.color.pegColor,
+                userScoreInput.inputValue.toString(),
+            )
+        }
+    }
+    //DebugScoreHistory(game)
 }
 
 @Composable
