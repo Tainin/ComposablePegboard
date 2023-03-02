@@ -28,6 +28,7 @@ import com.tainin.composablepegboard.model.UserScoreInput
 import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
+import com.tainin.composablepegboard.utils.toInputAction
 
 
 @Composable
@@ -89,7 +90,7 @@ fun PlayerScoreDisplay(
             color = Color.Black,
             shape = RoundedCornerShape(321.dp)
         )
-        //.background(Color.Black)
+    //.background(Color.Black)
 ) {
     Box(
         modifier = Modifier
@@ -195,7 +196,7 @@ fun main() = application {
     Window(
         state = windowState,
         onCloseRequest = ::exitApplication,
-        onKeyEvent = { keyEvent -> userScoreInput.applyKeyEvent(keyEvent) },
+        onKeyEvent = { keyEvent -> userScoreInput.applyInputAction(keyEvent.toInputAction()) },
     ) {
         GameWindow(game, userScoreInput)
     }
