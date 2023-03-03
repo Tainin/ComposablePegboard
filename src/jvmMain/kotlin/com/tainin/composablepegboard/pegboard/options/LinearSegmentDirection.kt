@@ -23,8 +23,8 @@ enum class LinearSegmentDirection {
 
     val lineOrder
         get() = when (this) {
-            North -> LineOrder.Reverse
-            South -> LineOrder.Forward
+            North -> LineOrder.Forward
+            South -> LineOrder.Reverse
             East -> LineOrder.Forward
             West -> LineOrder.Reverse
         }
