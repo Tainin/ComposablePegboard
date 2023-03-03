@@ -5,7 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.AbsoluteAlignment
@@ -26,32 +26,28 @@ import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.model.UserScoreInput
 import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
+import com.tainin.composablepegboard.pegboard.boards.SquareBoard
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
 import com.tainin.composablepegboard.utils.toInputAction
 
 
 @Composable
-fun GameBoard(game: Game) {
+fun BoardWithPegs(
+    game: Game,
+    board: @Composable (boardOffset: Offset) -> Unit,
+) {
     var boardOffset by remember { mutableStateOf(Offset.Zero) }
 
     Box(
         modifier = Modifier
-            .requiredHeight(IntrinsicSize.Min)
             .requiredWidth(IntrinsicSize.Min)
+            .requiredHeight(IntrinsicSize.Min)
             .onPlaced {
                 boardOffset = it.positionInRoot()
             }
     ) {
-        RectangularSpiralBoard(
-            boardOffset = boardOffset,
-            streetOptions = StreetOptions(64.dp, 12.dp),
-            streetSpacing = 68.dp,
-            segmentGap = 12.dp,
-            segmentAspectRatio = 2.5f,
-            game = game,
-            useHighlight = true,
-        )
+        board(boardOffset)
         PegsOverlay(
             game = game,
             animationSpec = tween(
@@ -65,65 +61,45 @@ fun GameBoard(game: Game) {
 }
 
 @Composable
-fun BoxScope.DebugScoreHistory(game: Game) = Column(
-    modifier = Modifier
-        .wrapContentSize()
-        .align(AbsoluteAlignment.TopLeft)
-) {
-    game[LineOrder.Forward].forEach { player ->
-        Text(
-            text = player.score.history.take(10).joinToString(", ")
-        )
-    }
-}
-
-@Composable
 fun PlayerScoreDisplay(
     frameColor: Color,
     scoreText: String,
 ) = Box(
     modifier = Modifier
-        .requiredSize(400.dp, 150.dp)
-        .clip(RoundedCornerShape(32.dp))
-        .border(
-            width = 4.dp,
-            color = Color.Black,
-            shape = RoundedCornerShape(32.dp)
-        )
-    //.background(Color.Black)
+        .requiredSize(250.dp, 80.dp)
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(64.dp)
+            .padding(24.dp)
             .border(
                 width = 8.dp,
                 color = frameColor,
-                shape = RoundedCornerShape(32.dp)
+                shape = CircleShape
             )
     )
     Text(
         modifier = Modifier
             .wrapContentHeight()
-            .requiredWidth(200.dp)
+            .requiredWidth(100.dp)
             .align(Alignment.Center)
-            //.clip(RoundedCornerShape(16.dp))
             .border(
                 width = 4.dp,
                 color = Color.Black,
-                shape = RoundedCornerShape(16.dp)
+                shape = CircleShape
             )
+            .clip(CircleShape)
             .background(Color.White)
             .padding(16.dp),
         text = scoreText,
-        fontSize = 36.sp,
+        fontSize = 25.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
     )
 }
 
 @Composable
-fun GameWindow(
+fun HorizontalGameWindow(
     game: Game,
     userScoreInput: UserScoreInput,
 ) = Box(
@@ -135,7 +111,19 @@ fun GameWindow(
             .align(Alignment.BottomCenter)
             .padding(bottom = 128.dp)
     ) {
-        GameBoard(game)
+        BoardWithPegs(
+            game = game,
+        ) { boardOffset ->
+            RectangularSpiralBoard(
+                boardOffset = boardOffset,
+                streetOptions = StreetOptions(64.dp, 12.dp),
+                streetSpacing = 68.dp,
+                segmentGap = 12.dp,
+                segmentAspectRatio = 2.5f,
+                game = game,
+                useHighlight = true,
+            )
+        }
     }
 
     Column(
@@ -166,7 +154,63 @@ fun GameWindow(
             )
         }
     }
-    //DebugScoreHistory(game)
+}
+
+@Composable
+fun SquareGameWindow(
+    game: Game,
+    userScoreInput: UserScoreInput,
+) = Box(
+    modifier = Modifier
+        .fillMaxSize()
+) {
+    Box(
+        modifier = Modifier
+            .wrapContentSize()
+            .align(AbsoluteAlignment.CenterLeft)
+            .absolutePadding(left = 128.dp)
+    ) {
+        BoardWithPegs(
+            game = game,
+        ) { boardOffset ->
+            SquareBoard(
+                boardOffset = boardOffset,
+                streetOptions = StreetOptions(64.dp, 12.dp),
+                segmentGap = 12.dp,
+                segmentAspectRatio = 1.75f,
+                game = game,
+                useHighlight = true,
+            )
+        }
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxHeight()
+            .wrapContentWidth()
+            .align(AbsoluteAlignment.CenterRight),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(32.dp),
+    ) {
+        userScoreInput.selectedPlayer?.let {
+            PlayerScoreDisplay(
+                it.color.pegColor,
+                userScoreInput.inputValue.toString(),
+            )
+        }
+        Column(
+            modifier = Modifier
+                .wrapContentSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(32.dp),
+        ) {
+            game[LineOrder.Forward].forEach {
+                PlayerScoreDisplay(
+                    it.color.pegColor,
+                    it.score.pair.lead.toString(),
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -198,6 +242,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         onKeyEvent = { keyEvent -> userScoreInput.applyInputAction(keyEvent.toInputAction()) },
     ) {
-        GameWindow(game, userScoreInput)
+        //HorizontalGameWindow(game, userScoreInput)
+        SquareGameWindow(game, userScoreInput)
     }
 }
