@@ -2,10 +2,10 @@ package com.tainin.composablepegboard.geometry
 
 import androidx.compose.ui.unit.Dp
 
-class LineSegment(
+class SeparatorBoardSegment(
     override val anchor: Anchor,
-    length: Dp,
-) : SegmentPath() {
-    override val nextAnchor = anchor.getLinearNext(length)
+    thickness: Dp,
+) : BoardSegment() {
+    override val nextAnchor = anchor.getLinearNext(thickness)
     override val boundingRect = anchor.makeBoundingRect(nextAnchor)
 }

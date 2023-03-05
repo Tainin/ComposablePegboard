@@ -8,11 +8,11 @@ import kotlin.math.withSign
 
 private const val MIN_ARC_ANGLE = 0.01f
 
-class ArcSegment(
+class ArcBoardSegment(
     override val anchor: Anchor,
     radius: Dp,
     arcAngle: Float,
-) : SegmentPath() {
+) : BoardSegment() {
     init {
         require(radius > 0.dp) { "radius must be greater than 0." }
         require(arcAngle.absoluteValue > MIN_ARC_ANGLE) { "angle must be greater than $MIN_ARC_ANGLE" }
