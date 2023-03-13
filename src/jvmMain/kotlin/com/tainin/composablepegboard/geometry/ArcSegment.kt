@@ -8,14 +8,14 @@ import kotlin.math.withSign
 class ArcSegment(
     inAngle: Float,
     arcAngle: Float,
-    val radius: Dp,
+    private val radius: Dp,
 ) : Segment() {
     override val angles = Bounds(inAngle) { it + arcAngle }
     override val positions: Bounds<DpOffset>
     override val size: DpSize
 
-    private val arcAngles: Bounds<Float>
-    private val center: DpOffset
+    val arcAngles: Bounds<Float>
+    val center: DpOffset
 
     init {
         arcAngles = Bounds(
@@ -40,6 +40,23 @@ class ArcSegment(
         center = DpOffset.Zero - bounds.topLeft
         size = bounds.size
         positions = arcPoints.transform { it - bounds.topLeft }
+    }
+
+    fun getRadii(
+        segmentDrawingOptions: SegmentDrawingOptions,
+        firstLineIndex: Int = 0,
+    ) = run {
+        val halfWidth = segmentDrawingOptions.streetWidth / 2f
+        val radiiBounds = Bounds(
+            start = radius - halfWidth,
+            end = radius + halfWidth,
+            reversed = angles.run { start > end },
+        )
+        segmentDrawingOptions
+            .getLineSpacing(firstLineIndex)
+            .map { f ->
+                radiiBounds.run { lerp(start, end, f) }
+            }
     }
 }
 

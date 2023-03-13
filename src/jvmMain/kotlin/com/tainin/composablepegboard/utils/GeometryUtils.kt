@@ -14,3 +14,9 @@ private const val RADIANS_TO_DEGREES = 180f / FloatPI
 fun Float.radiansToDegrees() = times(RADIANS_TO_DEGREES)
 
 fun Offset.Companion.unitFromAngle(angle: Float) = Offset(cos(angle), sin(angle))
+
+fun Offset.Companion.polarOffset(angle: Float, radius: Float) =
+    Offset(
+        x = radius * cos(angle),
+        y = radius * sin(angle),
+    )

@@ -3,12 +3,10 @@ package com.tainin.composablepegboard.pegboard.options
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import com.tainin.composablepegboard.model.LineOrder
+import com.tainin.composablepegboard.utils.FloatHalfPI
 import com.tainin.composablepegboard.utils.swap
 import com.tainin.composablepegboard.utils.transform
-import kotlin.math.PI
 import kotlin.math.min
-
-private const val HALF_PI = PI.toFloat() / 2f
 
 enum class ArcDirection {
     Clockwise,
@@ -30,7 +28,7 @@ enum class ArcFocus {
     Top,
     TopRight;
 
-    fun getClockwiseAngles() = getClockwiseIndices().transform { it * HALF_PI }
+    fun getClockwiseAngles() = getClockwiseIndices().transform { it * FloatHalfPI }
 
     fun getRadius(size: Size) = when (this) {
         Top, Bottom -> .5f to 1f
