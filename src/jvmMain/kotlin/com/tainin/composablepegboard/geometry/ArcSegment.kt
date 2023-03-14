@@ -62,6 +62,6 @@ class ArcSegment(
 
 private fun ClosedFloatingPointRange<Float>.getCardinalAnglesIn() =
     generateSequence(round(start / FloatTAU)) { it + 0.25f }
-        .take(4)
+        .take(5)
         .map { step -> step * FloatTAU }
         .filter { angle -> contains(angle) }
