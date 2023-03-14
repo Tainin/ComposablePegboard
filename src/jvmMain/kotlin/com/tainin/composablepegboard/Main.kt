@@ -15,14 +15,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
-import com.tainin.composablepegboard.geometry.*
+import com.tainin.composablepegboard.geometry.SegmentDrawingOptions
+import com.tainin.composablepegboard.geometry.SegmentPath
+import com.tainin.composablepegboard.geometry.drawSegment
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.model.UserScoreInput
@@ -32,7 +33,6 @@ import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
 import com.tainin.composablepegboard.utils.FloatTAU
 import com.tainin.composablepegboard.utils.toInputAction
-import com.tainin.composablepegboard.utils.topLeft
 
 
 @Composable
@@ -248,63 +248,34 @@ fun main() = application {
         //SquareGameWindow(game, userScoreInput)
         //HorizontalGameWindow(game, userScoreInput)
         //return@Window
-        val segments = sequenceOf(
-            /*
-            LineSegment(-FloatHalfPI, 150.dp),
-            ArcSegment(-FloatHalfPI, -FloatHalfPI, 80.dp),
-            LineSegment(-FloatPI, 150.dp),
-            ArcSegment(-FloatPI, -FloatHalfPI, 80.dp),
-            LineSegment(FloatHalfPI, 600.dp),
-            ArcSegment(FloatHalfPI, -FloatHalfPI, 80.dp),
-            LineSegment(0f, 600.dp),
-            ArcSegment(0f, -FloatHalfPI, 80.dp),
-            LineSegment(-FloatHalfPI, 600.dp),
-            ArcSegment(-FloatHalfPI, -FloatHalfPI, 80.dp),
-            LineSegment(-FloatPI, 150.dp),
-            ArcSegment(-FloatPI, -FloatHalfPI, 80.dp),
-            LineSegment(FloatHalfPI, 150.dp),
-            ArcSegment(FloatHalfPI, FloatHalfPI, 320.dp)
-            */
 
-            ArcSegment(16 * FloatTAU / 24, 17 * FloatTAU / 24, 200.dp),
-            LineSegment(9 * FloatTAU / 24, 300.dp),
-            ArcSegment(9 * FloatTAU / 24, -9 * FloatTAU / 24, 100.dp),
-            LineSegment(0 * FloatTAU / 24, 500.dp),
-            ArcSegment(0 * FloatTAU / 24, -6 * FloatTAU / 24, 100.dp),
-            LineSegment(-6 * FloatTAU / 24, 500.dp),
-            ArcSegment(-6 * FloatTAU / 24, -6 * FloatTAU / 24, 100.dp),
-            ArcSegment(-12 * FloatTAU / 24, -12 * FloatTAU / 24, 200.dp),
-
-
-            /*
-            ArcSegment(-FloatHalfPI, FloatHalfPI, 200.dp),
-            LineSegment(0f, 500.dp),
-            ArcSegment(0f, -FloatHalfPI, 200.dp),
-            */
-        )
+        val path = SegmentPath(16.dp).apply {
+            startNewPath(DpOffset.Zero, 88 * FloatTAU / 24)
+            addArcSegment(17 * FloatTAU / 144, 200.dp, 6)
+            addLineSegment(120.dp, 2)
+            addArcSegment(-9 * FloatTAU / 48, 100.dp, 2)
+            addLineSegment(120.dp, 4)
+            addArcSegment(-6 * FloatTAU / 24, 100.dp)
+            addLineSegment(120.dp, 4)
+            addArcSegment(-6 * FloatTAU / 24, 100.dp)
+            addArcSegment(-12 * FloatTAU / 96, 200.dp, 4)
+            shiftToOrigin()
+        }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
             val segmentDrawingOptions = SegmentDrawingOptions(
-                streetWidth = 72.dp,
-                lineThickness = 16.dp,
+                streetWidth = 52.dp,
+                lineThickness = 13.dp,
                 colors = game[LineOrder.Forward]
                     .asSequence()
                     .map { player -> player.color.highlightColor }
             )
 
-            testLayout(
-                modifier = Modifier
-                    .wrapContentSize(
-                        align = Alignment.Center,
-                        unbounded = true
-                    )
-                    .align(Alignment.Center)
-                    .background(Color.Gray)
-                    .padding(segmentDrawingOptions.run { (streetWidth + lineThickness) / 2 }),
-                segments = segments,
+            SegmentPath(
+                path = path,
                 segmentDrawingOptions = segmentDrawingOptions,
             )
         }
@@ -312,49 +283,22 @@ fun main() = application {
 }
 
 @Composable
-fun testLayout(
-    modifier: Modifier = Modifier,
-    segments: Sequence<Segment>,
+fun BoxScope.SegmentPath(
+    path: SegmentPath,
     segmentDrawingOptions: SegmentDrawingOptions,
-) = Layout(
-    content = {
-        segments.forEach { segment ->
-            Box(
-                modifier = Modifier
-                    .requiredSize(segment.size)
-                    .drawWithCache { drawSegment(segment, segmentDrawingOptions) }
-            )
-        }
-    },
-    modifier = modifier,
-) { measurables, constraints ->
-    var bounds = DpRect(DpOffset.Zero, DpSize.Zero)
-    var anchor = DpOffset.Zero
-
-    val placements = segments
-        .zip(measurables.asSequence())
-        .map {
-            val rect = DpRect(
-                anchor - it.first.positions.start,
-                it.first.size,
-            )
-
-            bounds = DpRect(
-                left = min(bounds.left, rect.left),
-                top = min(bounds.top, rect.top),
-                right = max(bounds.right, rect.right),
-                bottom = max(bounds.bottom, rect.bottom),
-            )
-
-            anchor = rect.topLeft + it.first.positions.end
-
-            rect.topLeft to it.second.measure(constraints)
-        }.toList()
-
-    layout(bounds.width.roundToPx(), bounds.height.roundToPx()) {
-        placements.forEach { (offset, placeable) ->
-            val position = offset - bounds.topLeft
-            position.run { placeable.place(x.roundToPx(), y.roundToPx()) }
-        }
+) = Box(
+    modifier = Modifier
+        .padding(segmentDrawingOptions.run { (streetWidth + lineThickness) / 2 })
+        .requiredSize(path.bounds.size)
+        .align(Alignment.Center)
+) {
+    path.parts.forEach { part ->
+        Box(
+            modifier = Modifier
+                .requiredWidth(max(part.segment.size.width, 1.dp))
+                .requiredHeight(max(part.segment.size.height, 1.dp))
+                .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
+                .drawWithCache { drawSegment(part.segment, segmentDrawingOptions) }
+        )
     }
 }

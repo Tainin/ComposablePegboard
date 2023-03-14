@@ -17,6 +17,7 @@ fun CacheDrawScope.drawSegment(
 ) = when (segment) {
     is LineSegment -> drawLineSegment(segment, segmentDrawingOptions)
     is ArcSegment -> drawArcSegment(segment, segmentDrawingOptions)
+    is SeparatorSegment -> onDrawBehind {  }
     else -> error("Unknown segment type")
 }
 
