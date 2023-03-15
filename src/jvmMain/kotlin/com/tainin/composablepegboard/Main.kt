@@ -26,6 +26,7 @@ import com.tainin.composablepegboard.geometry.SegmentPath
 import com.tainin.composablepegboard.geometry.drawSegment
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
+import com.tainin.composablepegboard.model.PlayerColor
 import com.tainin.composablepegboard.model.UserScoreInput
 import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
 import com.tainin.composablepegboard.pegboard.boards.SquareBoard
@@ -220,8 +221,8 @@ fun SquareGameWindow(
 fun rememberGame() = remember {
     //Game(121, PlayerColor.Purple)
     //Game.makeTwoPlayerGame(121)
-    Game.makeThreePlayerGame(121)
-    //Game(121, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
+    //Game.makeThreePlayerGame(121)
+    Game(121, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
 }
 
 @Composable
@@ -249,7 +250,7 @@ fun main() = application {
         //HorizontalGameWindow(game, userScoreInput)
         //return@Window
 
-        val path = SegmentPath(16.dp).apply {
+        val path29 = SegmentPath(16.dp).apply {
             startNewPath(DpOffset.Zero, 88 * FloatTAU / 24)
             addArcSegment(17 * FloatTAU / 144, 200.dp, 6)
             addLineSegment(120.dp, 2)
@@ -261,6 +262,24 @@ fun main() = application {
             addArcSegment(-12 * FloatTAU / 96, 200.dp, 4)
             shiftToOrigin()
         }
+        val pathArcs = SegmentPath(16.dp).apply {
+            startNewPath(DpOffset(300.dp, 50.dp), 5 * FloatTAU / 8)
+            addArcSegment(-2 * FloatTAU / (8 * 12), 700.dp, 12)
+            startNewPath(DpOffset((-300).dp, (-50).dp), 1 * FloatTAU / 8)
+            addArcSegment(-2 * FloatTAU / (8 * 12), 700.dp, 12)
+            shiftToOrigin()
+        }
+
+        val pathEllipse = SegmentPath(16.dp).apply {
+            startNewPath(DpOffset.Zero, -1 * FloatTAU / 8)
+            addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
+            addArcSegment(2 * FloatTAU / (8 * 2), 130.dp, 2)
+            addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
+
+            shiftToOrigin()
+        }
+
+        val path = path29
 
         Box(
             modifier = Modifier
