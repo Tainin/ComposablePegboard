@@ -6,8 +6,8 @@ import com.tainin.composablepegboard.utils.topLeft
 class SegmentPath(
     private val separatorWidth: Dp,
 ) {
-    private val _scoringParts = mutableListOf<Part<Segment>>()
-    val scoringParts: List<Part<Segment>> get() = _scoringParts
+    private val _scoringParts = mutableListOf<Part<ScoringSegment>>()
+    val scoringParts: List<Part<ScoringSegment>> get() = _scoringParts
     private val _separatorParts = mutableListOf<Part<SeparatorSegment>>()
     val separatorParts: List<Part<SeparatorSegment>> get() = _separatorParts
 
@@ -35,22 +35,22 @@ class SegmentPath(
     }
 
     fun addArcSegment(arcAngle: Float, radius: Dp, count: Int = 1) =
-        addSegment(count) { ArcSegment(currentAngle, arcAngle, radius) }
+        addScoringSegment(count) { ArcSegment(currentAngle, arcAngle, radius) }
 
     fun addLineSegment(length: Dp, count: Int = 1) =
-        addSegment(count) { LineSegment(currentAngle, length) }
+        addScoringSegment(count) { LineSegment(currentAngle, length) }
 
     fun addSeparatorSegment() {
         val separator = SeparatorSegment(currentAngle, separatorWidth)
         _separatorParts.add(Part(separator, fitSegment(separator)))
     }
 
-    private fun addSegment(count: Int, initializer: () -> Segment) {
+    private fun addScoringSegment(count: Int, initializer: () -> ScoringSegment) {
         require(count > 0) { "count must be greater than 0." }
         repeat(count) { addScoringPart(initializer(), true) }
     }
 
-    private fun addScoringPart(segment: Segment, addSeparator: Boolean) {
+    private fun addScoringPart(segment: ScoringSegment, addSeparator: Boolean) {
         _scoringParts.add(Part(segment, fitSegment(segment)))
         if (!addSeparator) return
         addSeparatorSegment()

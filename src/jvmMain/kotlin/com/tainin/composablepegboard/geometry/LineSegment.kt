@@ -9,7 +9,7 @@ import com.tainin.composablepegboard.utils.topLeft
 class LineSegment(
     inAngle: Float,
     length: Dp,
-) : Segment() {
+) : ScoringSegment() {
     override val angles = Bounds(inAngle)
     override val positions: Bounds<DpOffset>
     override val size: DpSize

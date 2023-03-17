@@ -11,13 +11,12 @@ import com.tainin.composablepegboard.utils.polarOffset
 import com.tainin.composablepegboard.utils.radiansToDegrees
 import com.tainin.composablepegboard.utils.toOffset
 
-fun CacheDrawScope.drawSegment(
-    segment: Segment,
+fun CacheDrawScope.drawScoringSegment(
+    segment: ScoringSegment,
     segmentDrawingOptions: SegmentDrawingOptions,
 ) = when (segment) {
     is LineSegment -> drawLineSegment(segment, segmentDrawingOptions)
     is ArcSegment -> drawArcSegment(segment, segmentDrawingOptions)
-    is SeparatorSegment -> drawSeparatorSegment(segment, segmentDrawingOptions)
     else -> error("Unknown segment type")
 }
 
@@ -112,7 +111,7 @@ private fun CacheDrawScope.drawLineSegment(
     }
 }
 
-private fun CacheDrawScope.drawSeparatorSegment(
+fun CacheDrawScope.drawSeparatorSegment(
     separatorSegment: SeparatorSegment,
     segmentDrawingOptions: SegmentDrawingOptions,
 ) = run {

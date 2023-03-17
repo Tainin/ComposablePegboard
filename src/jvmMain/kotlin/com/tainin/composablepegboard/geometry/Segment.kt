@@ -18,3 +18,5 @@ abstract class Segment {
     fun <T> Bounds(start: T, end: T, reversed: Boolean) =
         if (reversed) Bounds(end, start) else Bounds(start, end)
 }
+
+abstract class ScoringSegment : Segment()

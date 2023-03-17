@@ -9,7 +9,7 @@ class ArcSegment(
     inAngle: Float,
     arcAngle: Float,
     private val radius: Dp,
-) : Segment() {
+) : ScoringSegment() {
     override val angles = Bounds(inAngle) { it + arcAngle }
     override val positions: Bounds<DpOffset>
     override val size: DpSize
