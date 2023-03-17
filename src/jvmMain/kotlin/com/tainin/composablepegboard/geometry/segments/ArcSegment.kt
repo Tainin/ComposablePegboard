@@ -1,6 +1,7 @@
-package com.tainin.composablepegboard.geometry
+package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.*
+import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.utils.*
 import kotlin.math.round
 import kotlin.math.withSign

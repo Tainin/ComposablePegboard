@@ -21,10 +21,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
-import com.tainin.composablepegboard.geometry.SegmentDrawingOptions
-import com.tainin.composablepegboard.geometry.SegmentPath
-import com.tainin.composablepegboard.geometry.drawScoringSegment
-import com.tainin.composablepegboard.geometry.drawSeparatorSegment
+import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
+import com.tainin.composablepegboard.geometry.drawing.drawScoringSegment
+import com.tainin.composablepegboard.geometry.drawing.drawSeparatorSegment
+import com.tainin.composablepegboard.geometry.path.SegmentPath
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.model.UserScoreInput

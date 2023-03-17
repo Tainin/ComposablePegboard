@@ -1,4 +1,4 @@
-package com.tainin.composablepegboard.geometry
+package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.DpSize

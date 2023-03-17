@@ -1,6 +1,7 @@
-package com.tainin.composablepegboard.geometry
+package com.tainin.composablepegboard.geometry.path
 
 import androidx.compose.ui.unit.*
+import com.tainin.composablepegboard.geometry.segments.*
 import com.tainin.composablepegboard.utils.topLeft
 
 class SegmentPath(

@@ -1,4 +1,4 @@
-package com.tainin.composablepegboard.geometry
+package com.tainin.composablepegboard.geometry.drawing
 
 import androidx.compose.ui.draw.CacheDrawScope
 import androidx.compose.ui.geometry.Offset
@@ -7,6 +7,10 @@ import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import com.tainin.composablepegboard.geometry.segments.ArcSegment
+import com.tainin.composablepegboard.geometry.segments.LineSegment
+import com.tainin.composablepegboard.geometry.segments.ScoringSegment
+import com.tainin.composablepegboard.geometry.segments.SeparatorSegment
 import com.tainin.composablepegboard.utils.polarOffset
 import com.tainin.composablepegboard.utils.radiansToDegrees
 import com.tainin.composablepegboard.utils.toOffset

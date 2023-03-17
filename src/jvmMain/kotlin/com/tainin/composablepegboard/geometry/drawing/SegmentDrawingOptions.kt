@@ -1,4 +1,4 @@
-package com.tainin.composablepegboard.geometry
+package com.tainin.composablepegboard.geometry.drawing
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
