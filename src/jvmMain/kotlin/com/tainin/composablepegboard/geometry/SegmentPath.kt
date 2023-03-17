@@ -6,13 +6,18 @@ import com.tainin.composablepegboard.utils.topLeft
 class SegmentPath(
     private val separatorWidth: Dp,
 ) {
-    val parts = mutableListOf<Part>()
-    var anchor = DpOffset.Zero
-        private set
+    private val _scoringParts = mutableListOf<Part<Segment>>()
+    val scoringParts: List<Part<Segment>> get() = _scoringParts
+    private val _separatorParts = mutableListOf<Part<SeparatorSegment>>()
+    val separatorParts: List<Part<SeparatorSegment>> get() = _separatorParts
+
+
+
     var bounds = DpRect(DpOffset.Zero, DpSize.Zero)
         private set
 
     private var currentAngle = 0f
+    private var anchor = DpOffset.Zero
 
     fun startNewPath(newAnchor: DpOffset, newAngle: Float) {
         anchor = newAnchor
@@ -20,7 +25,10 @@ class SegmentPath(
     }
 
     fun shiftToOrigin() {
-        parts.replaceAll { part ->
+        _scoringParts.replaceAll { part ->
+            Part(part.segment, part.topLeft - bounds.topLeft)
+        }
+        _separatorParts.replaceAll { part ->
             Part(part.segment, part.topLeft - bounds.topLeft)
         }
         bounds = DpRect(DpOffset.Zero, bounds.size)
@@ -32,28 +40,34 @@ class SegmentPath(
     fun addLineSegment(length: Dp, count: Int = 1) =
         addSegment(count) { LineSegment(currentAngle, length) }
 
+    fun addSeparatorSegment() {
+        val separator = SeparatorSegment(currentAngle, separatorWidth)
+        _separatorParts.add(Part(separator, fitSegment(separator)))
+    }
+
     private fun addSegment(count: Int, initializer: () -> Segment) {
         require(count > 0) { "count must be greater than 0." }
-        repeat(count) { addSegment(initializer()) }
+        repeat(count) { addScoringPart(initializer(), true) }
     }
 
-    private fun addSegment(segment: Segment, addSeparator: Boolean = true) {
-        val segmentBounds = DpRect(anchor - segment.positions.start, segment.size)
-        anchor = segmentBounds.topLeft + segment.positions.end
-        currentAngle = segment.angles.end
-        bounds = DpRect(
-            left = min(bounds.left, segmentBounds.left),
-            top = min(bounds.top, segmentBounds.top),
-            right = max(bounds.right, segmentBounds.right),
-            bottom = max(bounds.bottom, segmentBounds.bottom),
-        )
-
-        parts.add(Part(segment, segmentBounds.topLeft))
-
+    private fun addScoringPart(segment: Segment, addSeparator: Boolean) {
+        _scoringParts.add(Part(segment, fitSegment(segment)))
         if (!addSeparator) return
-
-        addSegment(SeparatorSegment(currentAngle, separatorWidth), false)
+        addSeparatorSegment()
     }
 
-    class Part(val segment: Segment, val topLeft: DpOffset)
+    private fun fitSegment(segment: Segment) =
+        DpRect(anchor - segment.positions.start, segment.size)
+            .also { segmentBounds ->
+                anchor = segmentBounds.topLeft + segment.positions.end
+                currentAngle = segment.angles.end
+                bounds = DpRect(
+                    left = min(bounds.left, segmentBounds.left),
+                    top = min(bounds.top, segmentBounds.top),
+                    right = max(bounds.right, segmentBounds.right),
+                    bottom = max(bounds.bottom, segmentBounds.bottom),
+                )
+            }.topLeft
+
+    class Part<T : Segment>(val segment: T, val topLeft: DpOffset)
 }

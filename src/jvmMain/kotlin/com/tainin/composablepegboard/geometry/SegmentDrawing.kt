@@ -17,7 +17,7 @@ fun CacheDrawScope.drawSegment(
 ) = when (segment) {
     is LineSegment -> drawLineSegment(segment, segmentDrawingOptions)
     is ArcSegment -> drawArcSegment(segment, segmentDrawingOptions)
-    is SeparatorSegment -> onDrawBehind {  }
+    is SeparatorSegment -> drawSeparatorSegment(segment, segmentDrawingOptions)
     else -> error("Unknown segment type")
 }
 
@@ -109,5 +109,25 @@ private fun CacheDrawScope.drawLineSegment(
                 )
             }
         }
+    }
+}
+
+private fun CacheDrawScope.drawSeparatorSegment(
+    separatorSegment: SeparatorSegment,
+    segmentDrawingOptions: SegmentDrawingOptions,
+) = run {
+
+    val endpoints = separatorSegment
+        .getSeparatorEnds(segmentDrawingOptions)
+        .transform { point -> point.toOffset(this) }
+    val lineThickness = segmentDrawingOptions.separatorThickness.toPx()
+
+    onDrawBehind {
+        drawLine(
+            color = Color.Black,
+            start = endpoints.start,
+            end = endpoints.end,
+            strokeWidth = lineThickness,
+        )
     }
 }

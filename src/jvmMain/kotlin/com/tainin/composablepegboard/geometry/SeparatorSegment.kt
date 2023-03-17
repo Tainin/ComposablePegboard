@@ -1,6 +1,7 @@
 package com.tainin.composablepegboard.geometry
 
 import androidx.compose.ui.unit.*
+import com.tainin.composablepegboard.utils.FloatHalfPI
 import com.tainin.composablepegboard.utils.include
 import com.tainin.composablepegboard.utils.polarOffset
 import com.tainin.composablepegboard.utils.topLeft
@@ -19,5 +20,24 @@ class SeparatorSegment(
 
         size = rect.size
         positions = Bounds(DpOffset.Zero - rect.topLeft) { it + vector }
+    }
+
+    fun getSeparatorLabelOffset(
+        segmentDrawingOptions: SegmentDrawingOptions
+    ) = DpOffset.polarOffset(
+        angle = angles.start + FloatHalfPI,
+        radius = segmentDrawingOptions.separatorLabelDistance
+    )
+
+    fun getSeparatorEnds(
+        segmentDrawingOptions: SegmentDrawingOptions
+    ) = run {
+        val midpoint = positions.run { lerp(start, end, 0.5f) }
+        val maxOffset = DpOffset.polarOffset(
+            angle = angles.start + FloatHalfPI,
+            radius = segmentDrawingOptions.run { streetWidth + lineThickness } / 2f
+        )
+
+        Bounds(midpoint - maxOffset, midpoint + maxOffset)
     }
 }

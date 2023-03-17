@@ -9,6 +9,8 @@ private val singleLineStartStep = 0.0f to 0.5f
 class SegmentDrawingOptions(
     val streetWidth: Dp,
     val lineThickness: Dp,
+    val separatorThickness: Dp,
+    val separatorLabelDistance: Dp,
     val colors: Sequence<Color>,
     val useHighlight: Boolean = true,
 ) {

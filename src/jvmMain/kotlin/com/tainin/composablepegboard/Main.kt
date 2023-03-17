@@ -26,7 +26,6 @@ import com.tainin.composablepegboard.geometry.SegmentPath
 import com.tainin.composablepegboard.geometry.drawSegment
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
-import com.tainin.composablepegboard.model.PlayerColor
 import com.tainin.composablepegboard.model.UserScoreInput
 import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
 import com.tainin.composablepegboard.pegboard.boards.SquareBoard
@@ -221,8 +220,8 @@ fun SquareGameWindow(
 fun rememberGame() = remember {
     //Game(121, PlayerColor.Purple)
     //Game.makeTwoPlayerGame(121)
-    //Game.makeThreePlayerGame(121)
-    Game(121, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
+    Game.makeThreePlayerGame(121)
+    //Game(121, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue, PlayerColor.Purple)
 }
 
 @Composable
@@ -249,37 +248,35 @@ fun main() = application {
         //SquareGameWindow(game, userScoreInput)
         //HorizontalGameWindow(game, userScoreInput)
         //return@Window
+        val path = arrayOf(
+            SegmentPath(16.dp).apply {
+                startNewPath(DpOffset.Zero, 88 * FloatTAU / 24)
+                addArcSegment(17 * FloatTAU / 144, 200.dp, 6)
+                addLineSegment(120.dp, 2)
+                addArcSegment(-9 * FloatTAU / 48, 100.dp, 2)
+                addLineSegment(120.dp, 4)
+                addArcSegment(-6 * FloatTAU / 24, 100.dp)
+                addLineSegment(120.dp, 4)
+                addArcSegment(-6 * FloatTAU / 24, 100.dp)
+                addArcSegment(-12 * FloatTAU / 96, 200.dp, 4)
+                shiftToOrigin()
+            },
+            SegmentPath(16.dp).apply {
+                startNewPath(DpOffset(300.dp, 50.dp), 5 * FloatTAU / 8)
+                addArcSegment(-2 * FloatTAU / (8 * 12), 650.dp, 12)
+                startNewPath(DpOffset((-300).dp, (-50).dp), 1 * FloatTAU / 8)
+                addArcSegment(-2 * FloatTAU / (8 * 12), 650.dp, 12)
+                shiftToOrigin()
+            },
+            SegmentPath(16.dp).apply {
+                startNewPath(DpOffset.Zero, -1 * FloatTAU / 8)
+                addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
+                addArcSegment(2 * FloatTAU / (8 * 2), 130.dp, 2)
+                addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
 
-        val path29 = SegmentPath(16.dp).apply {
-            startNewPath(DpOffset.Zero, 88 * FloatTAU / 24)
-            addArcSegment(17 * FloatTAU / 144, 200.dp, 6)
-            addLineSegment(120.dp, 2)
-            addArcSegment(-9 * FloatTAU / 48, 100.dp, 2)
-            addLineSegment(120.dp, 4)
-            addArcSegment(-6 * FloatTAU / 24, 100.dp)
-            addLineSegment(120.dp, 4)
-            addArcSegment(-6 * FloatTAU / 24, 100.dp)
-            addArcSegment(-12 * FloatTAU / 96, 200.dp, 4)
-            shiftToOrigin()
-        }
-        val pathArcs = SegmentPath(16.dp).apply {
-            startNewPath(DpOffset(300.dp, 50.dp), 5 * FloatTAU / 8)
-            addArcSegment(-2 * FloatTAU / (8 * 12), 700.dp, 12)
-            startNewPath(DpOffset((-300).dp, (-50).dp), 1 * FloatTAU / 8)
-            addArcSegment(-2 * FloatTAU / (8 * 12), 700.dp, 12)
-            shiftToOrigin()
-        }
-
-        val pathEllipse = SegmentPath(16.dp).apply {
-            startNewPath(DpOffset.Zero, -1 * FloatTAU / 8)
-            addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
-            addArcSegment(2 * FloatTAU / (8 * 2), 130.dp, 2)
-            addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
-
-            shiftToOrigin()
-        }
-
-        val path = path29
+                shiftToOrigin()
+            },
+        )[0]
 
         Box(
             modifier = Modifier
@@ -288,6 +285,8 @@ fun main() = application {
             val segmentDrawingOptions = SegmentDrawingOptions(
                 streetWidth = 52.dp,
                 lineThickness = 13.dp,
+                separatorThickness = 5.dp,
+                separatorLabelDistance = 58.dp,
                 colors = game[LineOrder.Forward]
                     .asSequence()
                     .map { player -> player.color.highlightColor }
@@ -311,7 +310,7 @@ fun BoxScope.SegmentPath(
         .requiredSize(path.bounds.size)
         .align(Alignment.Center)
 ) {
-    path.parts.forEach { part ->
+    path.scoringParts.forEach { part ->
         Box(
             modifier = Modifier
                 .requiredWidth(max(part.segment.size.width, 1.dp))
@@ -319,5 +318,29 @@ fun BoxScope.SegmentPath(
                 .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
                 .drawWithCache { drawSegment(part.segment, segmentDrawingOptions) }
         )
+    }
+
+    var separatorIndex = 0
+    path.separatorParts.forEach { part ->
+        Box(
+            modifier = Modifier
+                .requiredWidth(max(part.segment.size.width, 1.dp))
+                .requiredHeight(max(part.segment.size.height, 1.dp))
+                .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
+                .drawWithCache { drawSegment(part.segment, segmentDrawingOptions) }
+        ) {
+            separatorIndex++
+
+            val separatorEndOffset = part.segment.getSeparatorLabelOffset(segmentDrawingOptions)
+            Text(
+                modifier = Modifier
+                    .wrapContentSize(unbounded = true)
+                    .align(Alignment.Center)
+                    .offset { separatorEndOffset.run { IntOffset(x.roundToPx(), y.roundToPx()) } },
+                text = separatorIndex.times(5).takeIf { it != 90 }?.toString() ?: "S",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+            )
+        }
     }
 }
