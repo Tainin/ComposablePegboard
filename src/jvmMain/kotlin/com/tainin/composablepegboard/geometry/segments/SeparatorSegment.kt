@@ -1,13 +1,14 @@
 package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.*
+import com.tainin.composablepegboard.geometry.drawing.SegmentDrawable
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.utils.*
 
 class SeparatorSegment(
     inAngle: Float,
     width: Dp,
-) : Segment() {
+) : Segment<SegmentDrawable>() {
     override val angles = Bounds(inAngle)
     override val positions: Bounds<DpOffset>
     override val size: DpSize
@@ -26,4 +27,11 @@ class SeparatorSegment(
         angle = angles.start + FloatHalfPI,
         radius = segmentDrawingOptions.separatorLabelDistance
     )
+
+    override fun getDrawable(
+        segmentDrawingOptions: SegmentDrawingOptions,
+        density: Density,
+    ): SegmentDrawable {
+        TODO("Not yet implemented")
+    }
 }

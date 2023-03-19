@@ -1,6 +1,8 @@
 package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.*
+import com.tainin.composablepegboard.geometry.drawing.MultiScoringSegmentDrawable
+import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.utils.*
 import kotlin.math.round
 import kotlin.math.withSign
@@ -40,6 +42,13 @@ class ArcSegment(
         center = DpOffset.Zero - bounds.topLeft
         size = bounds.size
         positions = arcPoints.transform { it - bounds.topLeft }
+    }
+
+    override fun getDrawable(
+        segmentDrawingOptions: SegmentDrawingOptions,
+        density: Density,
+    ): MultiScoringSegmentDrawable {
+        TODO("Not yet implemented")
     }
 }
 

@@ -57,7 +57,7 @@ class SegmentPath(
         addSeparatorSegment()
     }
 
-    private fun fitSegment(segment: Segment) =
+    private fun fitSegment(segment: AnySegment) =
         DpRect(anchor - segment.positions.start, segment.size)
             .also { segmentBounds ->
                 anchor = segmentBounds.topLeft + segment.positions.end
@@ -70,5 +70,5 @@ class SegmentPath(
                 )
             }.topLeft
 
-    class Part<T : Segment>(val segment: T, val topLeft: DpOffset)
+    class Part<T : AnySegment>(val segment: T, val topLeft: DpOffset)
 }
