@@ -2,10 +2,7 @@ package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.*
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
-import com.tainin.composablepegboard.utils.FloatHalfPI
-import com.tainin.composablepegboard.utils.include
-import com.tainin.composablepegboard.utils.polarOffset
-import com.tainin.composablepegboard.utils.topLeft
+import com.tainin.composablepegboard.utils.*
 
 class LineSegment(
     inAngle: Float,
