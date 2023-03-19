@@ -12,16 +12,18 @@ import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
+import com.tainin.composablepegboard.geometry.drawing.drawSegment
 import com.tainin.composablepegboard.geometry.path.SegmentPath
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
@@ -309,23 +311,33 @@ fun BoxScope.SegmentPath(
         .align(Alignment.Center)
 ) {
     path.scoringParts.forEach { part ->
+        val drawable = part.segment.getDrawable(
+            segmentDrawingOptions = segmentDrawingOptions,
+            density = LocalDensity.current,
+        )
+
         Box(
             modifier = Modifier
                 .requiredWidth(max(part.segment.size.width, 1.dp))
                 .requiredHeight(max(part.segment.size.height, 1.dp))
                 .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
-                .drawWithCache { onDrawBehind { /*New drawing system in progress*/ } }
+                .drawBehind { drawSegment(drawable) }
         )
     }
 
     var separatorIndex = 0
     path.separatorParts.forEach { part ->
+        val drawable = part.segment.getDrawable(
+            segmentDrawingOptions = segmentDrawingOptions,
+            density = LocalDensity.current
+        )
+
         Box(
             modifier = Modifier
                 .requiredWidth(max(part.segment.size.width, 1.dp))
                 .requiredHeight(max(part.segment.size.height, 1.dp))
                 .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
-                .drawWithCache { onDrawBehind { /*New drawing system in progress*/ } }
+                .drawBehind { drawSegment(drawable) }
         ) {
             separatorIndex++
 
