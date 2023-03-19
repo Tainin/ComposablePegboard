@@ -1,12 +1,14 @@
 package com.tainin.composablepegboard.geometry.segments
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.lerp
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.*
-import com.tainin.composablepegboard.geometry.drawing.MultiScoringSegmentDrawable
+import com.tainin.composablepegboard.geometry.drawing.MultiSegmentDrawable
+import com.tainin.composablepegboard.geometry.drawing.ScoringSegmentDrawable
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
-import com.tainin.composablepegboard.utils.Bounds
-import com.tainin.composablepegboard.utils.include
-import com.tainin.composablepegboard.utils.polarOffset
-import com.tainin.composablepegboard.utils.topLeft
+import com.tainin.composablepegboard.model.Player
+import com.tainin.composablepegboard.utils.*
 
 class LineSegment(
     inAngle: Float,
@@ -27,7 +29,48 @@ class LineSegment(
     override fun getDrawable(
         segmentDrawingOptions: SegmentDrawingOptions,
         density: Density,
-    ): MultiScoringSegmentDrawable {
-        TODO("Not yet implemented")
+    ): MultiSegmentDrawable<ScoringSegmentDrawable> = run {
+        val (streetWidth, lineThickness) =
+            with(density) {
+                segmentDrawingOptions.run {
+                    streetWidth.toPx() to lineThickness.toPx()
+                }
+            }
+
+        val offsetBounds = Offset.polarOffset(
+            angle = angles.start + FloatHalfPI,
+            radius = streetWidth / 2f,
+        ).let { max -> Bounds(-max, max) }
+
+        val centeredEnds = positions.transform { end -> end.toOffset(density) }
+
+        segmentDrawingOptions.players.mapIndexed { i, player ->
+            val (fStart, fStep) = segmentDrawingOptions.calcLineSpacingStartStep()
+            val offset = offsetBounds.run { lerp(start, end, fStart + (fStep * i)) }
+            val ends = centeredEnds.transform { end -> end + offset }
+            Drawable(
+                player = player,
+                lineThickness = lineThickness,
+                usePlayerHighlight = segmentDrawingOptions.useHighlight,
+                ends = ends
+            )
+        }.let { drawables -> MultiSegmentDrawable(drawables) }
+    }
+
+    private class Drawable(
+        player: Player,
+        lineThickness: Float,
+        usePlayerHighlight: Boolean,
+        private val ends: Bounds<Offset>,
+    ) : ScoringSegmentDrawable(player, lineThickness, usePlayerHighlight) {
+        override fun DrawScope.drawHighlight() =
+            drawLine(
+                color = player.color.highlightColor,
+                start = ends.start,
+                end = ends.end,
+                strokeWidth = lineThickness,
+            )
+
+        override fun getHoleOffset(fraction: Float) = ends.run { lerp(start, end, fraction) }
     }
 }
