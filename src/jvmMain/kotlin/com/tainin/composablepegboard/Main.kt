@@ -22,8 +22,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
-import com.tainin.composablepegboard.geometry.drawing.drawScoringSegment
-import com.tainin.composablepegboard.geometry.drawing.drawSeparatorSegment
 import com.tainin.composablepegboard.geometry.path.SegmentPath
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
@@ -317,7 +315,7 @@ fun BoxScope.SegmentPath(
                 .requiredWidth(max(part.segment.size.width, 1.dp))
                 .requiredHeight(max(part.segment.size.height, 1.dp))
                 .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
-                .drawWithCache { drawScoringSegment(part.segment, segmentDrawingOptions) }
+                .drawWithCache { onDrawBehind { /*New drawing system in progress*/ } }
         )
     }
 
@@ -328,7 +326,7 @@ fun BoxScope.SegmentPath(
                 .requiredWidth(max(part.segment.size.width, 1.dp))
                 .requiredHeight(max(part.segment.size.height, 1.dp))
                 .offset { part.topLeft.run { IntOffset(x.roundToPx(), y.roundToPx()) } }
-                .drawWithCache { drawSeparatorSegment(part.segment, segmentDrawingOptions) }
+                .drawWithCache { onDrawBehind { /*New drawing system in progress*/ } }
         ) {
             separatorIndex++
 
