@@ -1,8 +1,10 @@
 package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.*
-import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
-import com.tainin.composablepegboard.utils.*
+import com.tainin.composablepegboard.utils.Bounds
+import com.tainin.composablepegboard.utils.include
+import com.tainin.composablepegboard.utils.polarOffset
+import com.tainin.composablepegboard.utils.topLeft
 
 class LineSegment(
     inAngle: Float,
@@ -18,23 +20,5 @@ class LineSegment(
 
         size = rect.size
         positions = Bounds(DpOffset.Zero - rect.topLeft) { it + vector }
-    }
-
-    fun getLineEnds(
-        segmentDrawingOptions: SegmentDrawingOptions,
-        firstLineIndex: Int = 0,
-    ) = run {
-        val maxOffset = DpOffset.polarOffset(
-            angle = angles.start + FloatHalfPI,
-            radius = segmentDrawingOptions.streetWidth / 2f,
-        )
-        val bounds = Bounds(maxOffset, DpOffset.Zero - maxOffset)
-
-        segmentDrawingOptions
-            .getLineSpacing(firstLineIndex)
-            .map { f ->
-                val offset = bounds.run { lerp(start, end, f) }
-                positions.transform { end -> end + offset }
-            }
     }
 }

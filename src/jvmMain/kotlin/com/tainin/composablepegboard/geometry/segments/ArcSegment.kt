@@ -1,7 +1,6 @@
 package com.tainin.composablepegboard.geometry.segments
 
 import androidx.compose.ui.unit.*
-import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.utils.*
 import kotlin.math.round
 import kotlin.math.withSign
@@ -41,23 +40,6 @@ class ArcSegment(
         center = DpOffset.Zero - bounds.topLeft
         size = bounds.size
         positions = arcPoints.transform { it - bounds.topLeft }
-    }
-
-    fun getRadii(
-        segmentDrawingOptions: SegmentDrawingOptions,
-        firstLineIndex: Int = 0,
-    ) = run {
-        val halfWidth = segmentDrawingOptions.streetWidth / 2f
-        val radiiBounds = Bounds(
-            start = radius - halfWidth,
-            end = radius + halfWidth,
-            reversed = angles.run { start > end },
-        )
-        segmentDrawingOptions
-            .getLineSpacing(firstLineIndex)
-            .map { f ->
-                radiiBounds.run { lerp(start, end, f) }
-            }
     }
 }
 

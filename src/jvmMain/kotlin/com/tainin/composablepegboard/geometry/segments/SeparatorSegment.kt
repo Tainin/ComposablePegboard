@@ -26,16 +26,4 @@ class SeparatorSegment(
         angle = angles.start + FloatHalfPI,
         radius = segmentDrawingOptions.separatorLabelDistance
     )
-
-    fun getSeparatorEnds(
-        segmentDrawingOptions: SegmentDrawingOptions
-    ) = run {
-        val midpoint = positions.run { lerp(start, end, 0.5f) }
-        val maxOffset = DpOffset.polarOffset(
-            angle = angles.start + FloatHalfPI,
-            radius = segmentDrawingOptions.run { streetWidth + lineThickness } / 2f
-        )
-
-        Bounds(midpoint - maxOffset, midpoint + maxOffset)
-    }
 }
