@@ -286,9 +286,8 @@ fun main() = application {
                 lineThickness = 13.dp,
                 separatorThickness = 5.dp,
                 separatorLabelDistance = 58.dp,
-                colors = game[LineOrder.Forward]
+                players = game[LineOrder.Forward]
                     .asSequence()
-                    .map { player -> player.color.highlightColor }
             )
 
             SegmentPath(

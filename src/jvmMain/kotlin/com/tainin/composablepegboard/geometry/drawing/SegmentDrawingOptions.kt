@@ -1,21 +1,21 @@
 package com.tainin.composablepegboard.geometry.drawing
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.tainin.composablepegboard.model.Player
 
-private val singleLineStartStep = 0.0f to 0.5f
+private val singleLineStartStep = 0.5f to 0.0f
 
 class SegmentDrawingOptions(
     val streetWidth: Dp,
     val lineThickness: Dp,
     val separatorThickness: Dp,
     val separatorLabelDistance: Dp,
-    val colors: Sequence<Color>,
+    val players: Sequence<Player>,
     val useHighlight: Boolean = true,
 ) {
 
-    private val lineCount get() = colors.count()
+    private val lineCount = players.count()
 
     init {
         require(streetWidth > 0.dp) { "street width must be greater than 0." }
@@ -25,12 +25,5 @@ class SegmentDrawingOptions(
     fun calcLineSpacingStartStep() = when (lineCount) {
         1 -> singleLineStartStep
         else -> 0f to (1f / lineCount.dec())
-    }
-
-    fun getLineSpacing(firstLineIndex: Int) = run {
-        val (fStart, fStep) = calcLineSpacingStartStep()
-        generateSequence(firstLineIndex) { i -> i + 1 }
-            .map { i -> fStart + (fStep * i) }
-            .take(lineCount - firstLineIndex)
     }
 }
