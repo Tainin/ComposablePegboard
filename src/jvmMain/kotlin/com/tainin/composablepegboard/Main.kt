@@ -250,7 +250,7 @@ fun main() = application {
         //HorizontalGameWindow(game, userScoreInput)
         //return@Window
         val path = arrayOf(
-            SegmentPath(16.dp).apply {
+            SegmentPath.make(16.dp) {
                 startNewPath(DpOffset.Zero, 88 * FloatTAU / 24)
                 addArcSegment(17 * FloatTAU / 144, 200.dp, 6)
                 addLineSegment(120.dp, 2)
@@ -262,14 +262,14 @@ fun main() = application {
                 addArcSegment(-12 * FloatTAU / 96, 200.dp, 4)
                 shiftToOrigin()
             },
-            SegmentPath(16.dp).apply {
+            SegmentPath.make(16.dp) {
                 startNewPath(DpOffset(300.dp, 50.dp), 5 * FloatTAU / 8)
                 addArcSegment(-2 * FloatTAU / (8 * 12), 650.dp, 12)
                 startNewPath(DpOffset((-300).dp, (-50).dp), 1 * FloatTAU / 8)
                 addArcSegment(-2 * FloatTAU / (8 * 12), 650.dp, 12)
                 shiftToOrigin()
             },
-            SegmentPath(16.dp).apply {
+            SegmentPath.make(16.dp) {
                 startNewPath(DpOffset.Zero, -1 * FloatTAU / 8)
                 addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
                 addArcSegment(2 * FloatTAU / (8 * 2), 130.dp, 2)

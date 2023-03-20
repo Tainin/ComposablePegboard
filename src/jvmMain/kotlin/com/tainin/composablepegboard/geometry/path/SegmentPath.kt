@@ -13,8 +13,6 @@ class SegmentPath(
     private val _separatorParts = mutableListOf<Part<SeparatorSegment>>()
     val separatorParts: List<Part<SeparatorSegment>> get() = _separatorParts
 
-
-
     var bounds = DpRect(DpOffset.Zero, DpSize.Zero)
         private set
 
@@ -70,6 +68,11 @@ class SegmentPath(
                     bottom = max(bounds.bottom, segmentBounds.bottom),
                 )
             }.topLeft
+
+    companion object {
+        fun make(separatorWidth: Dp, initializer: SegmentPath.() -> Unit) =
+            SegmentPath(separatorWidth).apply(initializer)
+    }
 
     class Part<T : Segment<SegmentDrawable>>(val segment: T, val topLeft: DpOffset)
 }
