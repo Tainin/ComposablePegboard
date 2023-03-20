@@ -42,7 +42,7 @@ abstract class ScoringSegmentDrawable(
         }
 }
 
-class MultiSegmentDrawable<Drawable : SegmentDrawable>(
+class MultiDrawable<Drawable : SegmentDrawable>(
     private val drawables: Sequence<Drawable>,
 ) : SegmentDrawable() {
     override fun DrawScope.draw() =
@@ -51,6 +51,6 @@ class MultiSegmentDrawable<Drawable : SegmentDrawable>(
         }
 }
 
-typealias MultiScoringSegmentDrawable = MultiSegmentDrawable<ScoringSegmentDrawable>
+typealias ScoringSegmentMultiDrawable = MultiDrawable<ScoringSegmentDrawable>
 
 fun DrawScope.drawSegment(drawable: SegmentDrawable) = with(drawable) { draw() }

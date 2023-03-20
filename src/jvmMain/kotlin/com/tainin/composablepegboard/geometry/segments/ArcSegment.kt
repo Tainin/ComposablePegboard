@@ -5,8 +5,9 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.*
-import com.tainin.composablepegboard.geometry.drawing.MultiSegmentDrawable
+import com.tainin.composablepegboard.geometry.drawing.MultiDrawable
 import com.tainin.composablepegboard.geometry.drawing.ScoringSegmentDrawable
+import com.tainin.composablepegboard.geometry.drawing.ScoringSegmentMultiDrawable
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.model.Player
 import com.tainin.composablepegboard.utils.*
@@ -53,7 +54,7 @@ class ArcSegment(
     override fun getDrawable(
         segmentDrawingOptions: SegmentDrawingOptions,
         density: Density
-    ): MultiSegmentDrawable<ScoringSegmentDrawable> =
+    ): ScoringSegmentMultiDrawable =
         run {
             val (baseRadius, halfWidth, lineThickness) =
                 with(density) {
@@ -87,7 +88,7 @@ class ArcSegment(
                     startAngle = arcAngles.start,
                     sweepAngle = arcAngles.run { end - start },
                 )
-            }.let { drawables -> MultiSegmentDrawable(drawables) }
+            }.let { drawables -> MultiDrawable(drawables) }
         }
 
     private class Drawable(
