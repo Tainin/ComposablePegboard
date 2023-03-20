@@ -52,5 +52,3 @@ class MultiDrawable<Drawable : SegmentDrawable>(
 }
 
 typealias ScoringSegmentMultiDrawable = MultiDrawable<ScoringSegmentDrawable>
-
-fun DrawScope.drawSegment(drawable: SegmentDrawable) = with(drawable) { draw() }
