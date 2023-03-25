@@ -18,10 +18,12 @@ import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.size
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
-import com.tainin.composablepegboard.geometry.path.SegmentPath
 import com.tainin.composablepegboard.model.Game
 import com.tainin.composablepegboard.model.LineOrder
 import com.tainin.composablepegboard.model.UserScoreInput
@@ -29,8 +31,9 @@ import com.tainin.composablepegboard.pegboard.boards.RectangularSpiralBoard
 import com.tainin.composablepegboard.pegboard.boards.SquareBoard
 import com.tainin.composablepegboard.pegboard.options.StreetOptions
 import com.tainin.composablepegboard.pegboard.overlays.PegsOverlay
+import com.tainin.composablepegboard.premade.quadrantSpiral
 import com.tainin.composablepegboard.ui.pegboard.PathGameBoard
-import com.tainin.composablepegboard.utils.FloatTAU
+import com.tainin.composablepegboard.utils.FloatQuarterPI
 import com.tainin.composablepegboard.utils.toInputAction
 
 
@@ -247,35 +250,21 @@ fun main() = application {
         //SquareGameWindow(game, userScoreInput)
         //HorizontalGameWindow(game, userScoreInput)
         //return@Window
-        val path = arrayOf(
-            SegmentPath.make(16.dp) {
-                startNewPath(DpOffset.Zero, 88 * FloatTAU / 24)
-                addArcSegment(17 * FloatTAU / 144, 160.dp, 6)
-                addLineSegment(100.dp, 2)
-                addArcSegment(-9 * FloatTAU / 48, 100.dp, 2)
-                addLineSegment(100.dp, 4)
-                addArcSegment(-6 * FloatTAU / 24, 100.dp)
-                addLineSegment(100.dp, 4)
-                addArcSegment(-6 * FloatTAU / 24, 80.dp)
-                addArcSegment(-12 * FloatTAU / 96, 160.dp, 4)
-                shiftToOrigin()
-            },
-            SegmentPath.make(16.dp) {
-                startNewPath(DpOffset(300.dp, 50.dp), 5 * FloatTAU / 8)
-                addArcSegment(-2 * FloatTAU / (8 * 12), 650.dp, 12)
-                startNewPath(DpOffset((-300).dp, (-50).dp), 1 * FloatTAU / 8)
-                addArcSegment(-2 * FloatTAU / (8 * 12), 650.dp, 12)
-                shiftToOrigin()
-            },
-            SegmentPath.make(16.dp) {
-                startNewPath(DpOffset.Zero, -1 * FloatTAU / 8)
-                addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
-                addArcSegment(2 * FloatTAU / (8 * 2), 130.dp, 2)
-                addArcSegment(2 * FloatTAU / (8 * 11), 700.dp, 11)
 
-                shiftToOrigin()
-            },
-        )[0]
+        val path = quadrantSpiral(
+            separatorWidth = 16.dp,
+            quarters = sequenceOf(
+                350.dp to 4,
+                325.dp to 4,
+                300.dp to 3,
+                275.dp to 3,
+                250.dp to 3,
+                225.dp to 3,
+                200.dp to 2,
+                175.dp to 2,
+            ),
+            startAngle = FloatQuarterPI / 2f,
+        )
 
         Box(
             modifier = Modifier
