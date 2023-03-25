@@ -45,7 +45,7 @@ class LineSegment(
 
         val centeredEnds = positions.transform { end -> end.toOffset(density) }
 
-        segmentDrawingOptions.players.mapIndexed { i, player ->
+        segmentDrawingOptions.game.playerSequence.mapIndexed { i, player ->
             val (fStart, fStep) = segmentDrawingOptions.calcLineSpacingStartStep()
             val offset = offsetBounds.run { lerp(start, end, fStart + (fStep * i)) }
             val ends = centeredEnds.transform { end -> end + offset }

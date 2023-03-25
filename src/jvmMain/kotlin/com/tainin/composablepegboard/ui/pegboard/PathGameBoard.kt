@@ -10,13 +10,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.geometry.path.SegmentPath
-import com.tainin.composablepegboard.model.Game
 
 @Composable
 fun PathGameBoard(
     modifier: Modifier = Modifier,
     segmentDrawingOptions: SegmentDrawingOptions,
-    game: Game,
     path: SegmentPath,
 ) = Box(
     modifier = modifier

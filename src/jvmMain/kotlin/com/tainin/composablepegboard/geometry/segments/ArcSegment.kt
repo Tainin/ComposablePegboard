@@ -73,7 +73,7 @@ class ArcSegment(
 
             val center = center.toOffset(density)
 
-            segmentDrawingOptions.players.mapIndexed { i, player ->
+            segmentDrawingOptions.game.playerSequence.mapIndexed { i, player ->
                 val (fStart, fStep) = segmentDrawingOptions.calcLineSpacingStartStep()
                 val lineRadius = radiiBounds.run {
                     val f = fStart + (fStep * i)

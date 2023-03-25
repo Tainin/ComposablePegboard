@@ -2,7 +2,7 @@ package com.tainin.composablepegboard.geometry.drawing
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.tainin.composablepegboard.model.Player
+import com.tainin.composablepegboard.model.Game
 
 private val singleLineStartStep = 0.5f to 0.0f
 
@@ -11,11 +11,11 @@ class SegmentDrawingOptions(
     val lineThickness: Dp,
     val separatorThickness: Dp,
     val separatorLabelDistance: Dp,
-    val players: Sequence<Player>,
+    val game: Game,
     val useHighlight: Boolean = true,
 ) {
 
-    private val lineCount = players.count()
+    private val lineCount = game.playerCount
 
     init {
         require(streetWidth > 0.dp) { "street width must be greater than 0." }

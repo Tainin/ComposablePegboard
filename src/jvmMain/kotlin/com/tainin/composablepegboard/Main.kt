@@ -283,11 +283,10 @@ fun main() = application {
         ) {
             val segmentDrawingOptions = SegmentDrawingOptions(
                 streetWidth = 52.dp,
-                lineThickness = 13.dp,
-                separatorThickness = 5.dp,
-                separatorLabelDistance = 58.dp,
-                players = game[LineOrder.Forward]
-                    .asSequence()
+                lineThickness = 14.dp,
+                separatorThickness = 3.dp,
+                separatorLabelDistance = 48.dp,
+                game = game
             )
             PathGameBoard(
                 modifier = Modifier
@@ -295,7 +294,6 @@ fun main() = application {
                     .requiredSize(path.bounds.size)
                     .align(Alignment.Center),
                 segmentDrawingOptions = segmentDrawingOptions,
-                game = game,
                 path = path,
             )
         }

@@ -13,6 +13,8 @@ class Game(private val winningScore: Int, vararg colors: PlayerColor) {
     private val reversed = players.asReversed()
     val playerCount = players.size
 
+    val playerSequence = players.asSequence() //TODO Temporary compatibility fix until I get a chance to refactor
+
     private val winner get() = players.find { it.score.pair.lead >= winningScore }
     val hasWinner get() = winner?.let { true } ?: false
     val ongoing get() = winner?.let { false } ?: true
@@ -20,7 +22,8 @@ class Game(private val winningScore: Int, vararg colors: PlayerColor) {
 
     companion object {
         fun makeTwoPlayerGame(winningScore: Int) = Game(winningScore, PlayerColor.Red, PlayerColor.Blue)
-        fun makeThreePlayerGame(winningScore: Int) = Game(winningScore, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue)
+        fun makeThreePlayerGame(winningScore: Int) =
+            Game(winningScore, PlayerColor.Red, PlayerColor.Green, PlayerColor.Blue)
     }
 
     operator fun get(order: LineOrder) = when (order) {
