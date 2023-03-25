@@ -23,15 +23,20 @@ abstract class HighlightedSegmentDrawable(
     }
 }
 
-abstract class ScoringSegmentDrawable(
+abstract class PeggingLineDrawable(
     val player: Player,
     val lineThickness: Float,
+    val holeCount: Int,
     usePlayerHighlight: Boolean,
 ) : HighlightedSegmentDrawable(usePlayerHighlight) {
+
+    constructor(player: Player, lineThickness: Float, usePlayerHighlights: Boolean) :
+            this(player, lineThickness, 5, usePlayerHighlights)
+
     protected abstract fun getHoleOffset(fraction: Float): Offset
-    fun getHoleOffset(index: Int) = getHoleOffset((0.5f + index) / 5f)
+    fun getHoleOffset(index: Int) = getHoleOffset((0.5f + index) / holeCount)
     final override fun DrawScope.drawOverHighlight() =
-        (0 until 5).forEach { i ->
+        (0 until holeCount).forEach { i ->
             val center = getHoleOffset(i)
             drawCircle(
                 color = Color.Black,
@@ -50,5 +55,3 @@ class MultiDrawable<Drawable : SegmentDrawable>(
             with(drawable) { draw() }
         }
 }
-
-typealias ScoringSegmentMultiDrawable = MultiDrawable<ScoringSegmentDrawable>

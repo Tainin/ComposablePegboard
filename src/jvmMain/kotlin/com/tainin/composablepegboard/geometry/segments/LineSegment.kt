@@ -5,8 +5,7 @@ import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.unit.*
 import com.tainin.composablepegboard.geometry.drawing.MultiDrawable
-import com.tainin.composablepegboard.geometry.drawing.ScoringSegmentDrawable
-import com.tainin.composablepegboard.geometry.drawing.ScoringSegmentMultiDrawable
+import com.tainin.composablepegboard.geometry.drawing.PeggingLineDrawable
 import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.model.Player
 import com.tainin.composablepegboard.utils.*
@@ -30,7 +29,7 @@ class LineSegment(
     override fun getDrawable(
         segmentDrawingOptions: SegmentDrawingOptions,
         density: Density,
-    ): ScoringSegmentMultiDrawable = run {
+    ): MultiDrawable<PeggingLineDrawable> = run {
         val (streetWidth, lineThickness) =
             with(density) {
                 segmentDrawingOptions.run {
@@ -63,7 +62,7 @@ class LineSegment(
         lineThickness: Float,
         usePlayerHighlight: Boolean,
         private val ends: Bounds<Offset>,
-    ) : ScoringSegmentDrawable(player, lineThickness, usePlayerHighlight) {
+    ) : PeggingLineDrawable(player, lineThickness, usePlayerHighlight) {
         override fun DrawScope.drawHighlight() =
             drawLine(
                 color = player.color.highlightColor,
