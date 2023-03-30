@@ -13,6 +13,7 @@ import com.tainin.composablepegboard.utils.*
 class LineSegment(
     inAngle: Float,
     length: Dp,
+    override val holeCount: Int,
 ) : ScoringSegment() {
     override val angles = Bounds(inAngle)
     override val positions: Bounds<DpOffset>
@@ -52,6 +53,7 @@ class LineSegment(
                 player = player,
                 lineThickness = lineThickness,
                 usePlayerHighlight = segmentDrawingOptions.useHighlight,
+                holeCount = holeCount,
                 ends = ends
             )
         }.let { drawables -> MultiDrawable(drawables) }
@@ -61,8 +63,9 @@ class LineSegment(
         player: Player,
         lineThickness: Float,
         usePlayerHighlight: Boolean,
+        holeCount: Int,
         private val ends: Bounds<Offset>,
-    ) : PeggingLineDrawable(player, lineThickness, usePlayerHighlight) {
+    ) : PeggingLineDrawable(player, lineThickness, holeCount, usePlayerHighlight) {
         override fun DrawScope.drawHighlight() =
             drawLine(
                 color = player.color.highlightColor,

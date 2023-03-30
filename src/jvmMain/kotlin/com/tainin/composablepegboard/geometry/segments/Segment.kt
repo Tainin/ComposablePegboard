@@ -22,4 +22,6 @@ abstract class DrawableSegment<out Drawable : SegmentDrawable> : Segment() {
     ): Drawable
 }
 
-typealias ScoringSegment = DrawableSegment<MultiDrawable<PeggingLineDrawable>>
+abstract class ScoringSegment : DrawableSegment<MultiDrawable<PeggingLineDrawable>>() {
+    protected abstract val holeCount: Int
+}

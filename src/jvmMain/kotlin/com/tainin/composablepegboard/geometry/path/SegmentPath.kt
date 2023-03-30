@@ -34,10 +34,10 @@ class SegmentPath(
     }
 
     fun addArcSegment(arcAngle: Float, radius: Dp, count: Int = 1) =
-        addScoringSegment(count) { ArcSegment(currentAngle, arcAngle, radius) }
+        addScoringSegment(count) { ArcSegment(currentAngle, arcAngle, radius, 5) }
 
     fun addLineSegment(length: Dp, count: Int = 1) =
-        addScoringSegment(count) { LineSegment(currentAngle, length) }
+        addScoringSegment(count) { LineSegment(currentAngle, length, 5) }
 
     fun addSeparatorSegment() {
         val separator = SeparatorSegment(currentAngle, separatorWidth)

@@ -17,6 +17,7 @@ class ArcSegment(
     inAngle: Float,
     arcAngle: Float,
     private val radius: Dp,
+    override val holeCount: Int,
 ) : ScoringSegment() {
     override val angles = Bounds(inAngle) { it + arcAngle }
     override val positions: Bounds<DpOffset>
@@ -82,6 +83,7 @@ class ArcSegment(
                     player = player,
                     lineThickness = lineThickness,
                     usePlayerHighlight = segmentDrawingOptions.useHighlight,
+                    holeCount = holeCount,
                     center = center,
                     radius = lineRadius,
                     startAngle = arcAngles.start,
@@ -94,11 +96,12 @@ class ArcSegment(
         player: Player,
         lineThickness: Float,
         usePlayerHighlight: Boolean,
+        holeCount: Int,
         val center: Offset,
         val radius: Float,
         val startAngle: Float,
         val sweepAngle: Float,
-    ) : PeggingLineDrawable(player, lineThickness, usePlayerHighlight) {
+    ) : PeggingLineDrawable(player, lineThickness, holeCount, usePlayerHighlight) {
 
         val rect = Rect(
             left = center.x - radius,
