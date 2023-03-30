@@ -11,7 +11,7 @@ import com.tainin.composablepegboard.utils.*
 class SeparatorSegment(
     inAngle: Float,
     width: Dp,
-) : Segment<SegmentDrawable>() {
+) : DrawableSegment<SegmentDrawable>() {
     override val angles = Bounds(inAngle)
     override val positions: Bounds<DpOffset>
     override val size: DpSize

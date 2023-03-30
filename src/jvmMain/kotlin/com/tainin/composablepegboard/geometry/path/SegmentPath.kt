@@ -1,7 +1,6 @@
 package com.tainin.composablepegboard.geometry.path
 
 import androidx.compose.ui.unit.*
-import com.tainin.composablepegboard.geometry.drawing.SegmentDrawable
 import com.tainin.composablepegboard.geometry.segments.*
 import com.tainin.composablepegboard.utils.topLeft
 
@@ -56,7 +55,7 @@ class SegmentPath(
         addSeparatorSegment()
     }
 
-    private fun fitSegment(segment: Segment<SegmentDrawable>) =
+    private fun fitSegment(segment: Segment) =
         DpRect(anchor - segment.positions.start, segment.size)
             .also { segmentBounds ->
                 anchor = segmentBounds.topLeft + segment.positions.end
@@ -74,5 +73,5 @@ class SegmentPath(
             SegmentPath(separatorWidth).apply(initializer)
     }
 
-    class Part<T : Segment<SegmentDrawable>>(val segment: T, val topLeft: DpOffset)
+    class Part<T : Segment>(val segment: T, val topLeft: DpOffset)
 }
