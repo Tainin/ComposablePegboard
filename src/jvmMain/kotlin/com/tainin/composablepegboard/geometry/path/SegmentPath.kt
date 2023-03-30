@@ -1,15 +1,19 @@
 package com.tainin.composablepegboard.geometry.path
 
 import androidx.compose.ui.unit.*
+import com.tainin.composablepegboard.geometry.drawing.MultiDrawable
+import com.tainin.composablepegboard.geometry.drawing.PeggingLineDrawable
+import com.tainin.composablepegboard.geometry.drawing.SegmentDrawingOptions
 import com.tainin.composablepegboard.geometry.segments.*
+import com.tainin.composablepegboard.utils.Bounds
 import com.tainin.composablepegboard.utils.topLeft
 
 class SegmentPath(
     private val separatorWidth: Dp,
 ) {
-    private val _scoringParts = mutableListOf<Part<ScoringSegment>>()
+    private val _scoringParts = mutableListOf<PartImpl<ScoringSegment>>()
     val scoringParts: List<Part<ScoringSegment>> get() = _scoringParts
-    private val _separatorParts = mutableListOf<Part<SeparatorSegment>>()
+    private val _separatorParts = mutableListOf<PartImpl<SeparatorSegment>>()
     val separatorParts: List<Part<SeparatorSegment>> get() = _separatorParts
 
     var bounds = DpRect(DpOffset.Zero, DpSize.Zero)
@@ -18,17 +22,41 @@ class SegmentPath(
     private var currentAngle = 0f
     private var anchor = DpOffset.Zero
 
+    private var _startPart = run {
+        val segment = object : ScoringSegment() {
+            override fun getDrawable(
+                segmentDrawingOptions: SegmentDrawingOptions,
+                density: Density
+            ) = MultiDrawable<PeggingLineDrawable>(sequenceOf())
+
+            override val angles = Bounds(0f)
+            override val positions = Bounds(DpOffset.Zero)
+            override val size: DpSize = DpSize.Zero
+            override val holeCount = 0
+
+        }
+        PartImpl<ScoringSegment>(segment, fitSegment(segment))
+    }
+    val startPart: Part<ScoringSegment> get() = _startPart
+
+    fun startPath(startAnchor: DpOffset, startSegment: ScoringSegment) {
+        startNewPath(startAnchor, startSegment.angles.start)
+        _startPart = PartImpl(startSegment, fitSegment(startSegment))
+        addSeparatorSegment()
+    }
+
     fun startNewPath(newAnchor: DpOffset, newAngle: Float) {
         anchor = newAnchor
         currentAngle = newAngle
     }
 
     fun shiftToOrigin() {
-        _scoringParts.replaceAll { part ->
-            Part(part.segment, part.topLeft - bounds.topLeft)
-        }
-        _separatorParts.replaceAll { part ->
-            Part(part.segment, part.topLeft - bounds.topLeft)
+        sequence {
+            yield(_startPart)
+            yieldAll(_scoringParts)
+            yieldAll(_separatorParts)
+        }.forEach { part ->
+            part.topLeft = part.topLeft - bounds.topLeft
         }
         bounds = DpRect(DpOffset.Zero, bounds.size)
     }
@@ -41,7 +69,7 @@ class SegmentPath(
 
     fun addSeparatorSegment() {
         val separator = SeparatorSegment(currentAngle, separatorWidth)
-        _separatorParts.add(Part(separator, fitSegment(separator)))
+        _separatorParts.add(PartImpl(separator, fitSegment(separator)))
     }
 
     private fun addScoringSegment(count: Int, initializer: () -> ScoringSegment) {
@@ -50,7 +78,7 @@ class SegmentPath(
     }
 
     private fun addScoringPart(segment: ScoringSegment, addSeparator: Boolean) {
-        _scoringParts.add(Part(segment, fitSegment(segment)))
+        _scoringParts.add(PartImpl(segment, fitSegment(segment)))
         if (!addSeparator) return
         addSeparatorSegment()
     }
@@ -73,5 +101,13 @@ class SegmentPath(
             SegmentPath(separatorWidth).apply(initializer)
     }
 
-    class Part<T : Segment>(val segment: T, val topLeft: DpOffset)
+    interface Part<out T : Segment> {
+        val segment: T
+        val topLeft: DpOffset
+    }
+
+    private class PartImpl<out T : Segment>(
+        override val segment: T,
+        override var topLeft: DpOffset,
+    ) : Part<T>
 }
