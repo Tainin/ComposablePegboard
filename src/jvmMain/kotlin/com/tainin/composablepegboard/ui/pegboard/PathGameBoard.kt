@@ -19,6 +19,16 @@ fun PathGameBoard(
 ) = Box(
     modifier = modifier
 ) {
+
+    path.startPart.let { part ->
+        val drawable = part.segment.getDrawable(
+            segmentDrawingOptions = segmentDrawingOptions,
+            density = LocalDensity.current,
+        )
+
+        SegmentWidget(part.topLeft, part.segment.size, drawable)
+    }
+
     path.scoringParts.forEach { part ->
         val drawable = part.segment.getDrawable(
             segmentDrawingOptions = segmentDrawingOptions,
@@ -35,7 +45,6 @@ fun PathGameBoard(
             density = LocalDensity.current
         )
 
-        separatorIndex++
         SeparatorWidget(
             topLeft = part.topLeft,
             size = part.segment.size,
@@ -45,5 +54,6 @@ fun PathGameBoard(
             style = TextStyle(Color.Black, 18.sp, FontWeight.Bold),
             labelOffset = part.segment.getSeparatorLabelOffset(segmentDrawingOptions),
         )
+        separatorIndex++
     }
 }
