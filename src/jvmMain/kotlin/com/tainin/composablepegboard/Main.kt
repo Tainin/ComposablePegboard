@@ -251,20 +251,13 @@ fun main() = application {
         //HorizontalGameWindow(game, userScoreInput)
         //return@Window
 
-        val path = quadrantSpiral(
-            separatorWidth = 16.dp,
-            quarters = sequenceOf(
-                350.dp to 4,
-                325.dp to 4,
-                300.dp to 3,
-                275.dp to 3,
-                250.dp to 3,
-                225.dp to 3,
-                200.dp to 2,
-                175.dp to 2,
-            ),
-            startAngle = FloatQuarterPI / 2f,
-        )
+
+        val radii = generateSequence(350) { it - 25 }.map { it.dp }
+        val counts = sequenceOf(4, 4, 3, 3, 3, 3, 2, 2)
+        val quarters = radii.zip(counts)
+        val path = quadrantSpiral(16.dp, quarters, FloatQuarterPI / 2f)
+//        val path = twentyNine(16.dp, 120.dp, Triple(80.dp, 100.dp, 160.dp))
+//        val path = classicTrack(16.dp, 150.dp, 90.dp, 0f)
 
         Box(
             modifier = Modifier

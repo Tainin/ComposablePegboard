@@ -11,7 +11,7 @@ abstract class SegmentDrawable {
 }
 
 abstract class HighlightedSegmentDrawable(
-    val usePlayerHighlights: Boolean,
+    private val usePlayerHighlights: Boolean,
 ) : SegmentDrawable() {
     protected abstract fun DrawScope.drawHighlight()
     protected abstract fun DrawScope.drawOverHighlight()
@@ -26,12 +26,9 @@ abstract class HighlightedSegmentDrawable(
 abstract class PeggingLineDrawable(
     val player: Player,
     val lineThickness: Float,
-    val holeCount: Int,
+    private val holeCount: Int,
     usePlayerHighlight: Boolean,
 ) : HighlightedSegmentDrawable(usePlayerHighlight) {
-
-    constructor(player: Player, lineThickness: Float, usePlayerHighlights: Boolean) :
-            this(player, lineThickness, 5, usePlayerHighlights)
 
     protected abstract fun getHoleOffset(fraction: Float): Offset
     fun getHoleOffset(index: Int) = getHoleOffset((0.5f + index) / holeCount)
@@ -54,4 +51,6 @@ class MultiDrawable<Drawable : SegmentDrawable>(
         drawables.forEach { drawable ->
             with(drawable) { draw() }
         }
+
+    fun getOrNull(index: Int) = drawables.drop(index).firstOrNull()
 }
